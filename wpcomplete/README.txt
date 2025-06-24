@@ -1,11 +1,11 @@
 === WPComplete ===
 Author URI: https://wpcomplete.co
 Author: StellarWP
-Contributors: stellarwp, layotte
+Contributors: stellarwp
 Tags: courses, teaching, read, mark, complete, lms, membership, pages, page, posts, post, widget, plugin, admin, shortcode, progress, progress bar, completion, tracking, dashboard, groups, learning
 Requires at least: 4.5.3
-Tested up to: 6.1 
-Stable tag: 2.9.5 
+Tested up to: 6.8.1 
+Stable tag: 2.9.5.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 A WordPress plugin that helps your students keep track of their progress through your course.
@@ -161,6 +161,10 @@ To add the button to your page:
 
 
 == Changelog ==
+
+= 2.9.5.1 =
+
+* Security Fix: Improve security and prevent XSS vulnerabilities.
 
 = 2.9.5 =
 * Bug Fix: Using proper source for post_content

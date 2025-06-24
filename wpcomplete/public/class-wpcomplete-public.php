@@ -120,11 +120,11 @@ class WPComplete_Public extends WPComplete_Common {
     // Feature: Allow for custom button texts if it exists for this button:
     $button_text = get_option($this->plugin_name . '_incomplete_text', 'Mark as complete');
     if ( isset( $_POST['old_button_text'] ) && !empty( $_POST['old_button_text'] ) ) {
-      $button_text = $_POST['old_button_text'];
+      $button_text = sanitize_text_field($_POST['old_button_text']);
     }
     $completed_button_text = get_option($this->plugin_name . '_completed_text', 'COMPLETED');
     if ( isset( $_POST['new_button_text'] ) && !empty( $_POST['new_button_text'] ) ) {
-      $completed_button_text = $_POST['new_button_text'];
+      $completed_button_text = sanitize_text_field($_POST['new_button_text']);
     }
 
     $updates_to_sendback = array( 
@@ -287,23 +287,23 @@ class WPComplete_Public extends WPComplete_Common {
     // Feature: Allow for custom button texts and styles if it exists for this button:
     $button_text = get_option($this->plugin_name . '_incomplete_text', 'Mark as complete');
     if ( isset( $atts['text'] ) && !empty( $atts['text'] ) ) {
-      $button_text = stripslashes($atts['text']);
+      $button_text = sanitize_text_field(stripslashes($atts['text']));
     }
     $completed_button_text = get_option($this->plugin_name . '_completed_text', 'COMPLETED');
     if ( isset( $atts['completed_text'] ) && !empty( $atts['completed_text'] ) ) {
-      $completed_button_text = stripslashes($atts['completed_text']);
+      $completed_button_text = sanitize_text_field(stripslashes($atts['completed_text']));
     }
     $redirect_url = false;
     if ( isset( $atts['redirect'] ) && !empty( $atts['redirect'] ) ) {
-      $redirect_url = $atts['redirect'];
+      $redirect_url = sanitize_text_field($atts['redirect']);
     }
     $custom_classes = false;
     if ( isset( $atts['class'] ) && !empty( $atts['class'] ) ) {
-      $custom_classes = $atts['class'];
+      $custom_classes = sanitize_text_field($atts['class']);
     }
     $custom_styles = false;
     if ( isset( $atts['style'] ) && !empty( $atts['style'] ) ) {
-      $custom_styles = $atts['style'];
+      $custom_styles = sanitize_text_field($atts['style']);
     }
 
     ob_start();
@@ -809,19 +809,19 @@ li .wpc-lesson-completed:after { content: "✔"; margin-left: 5px; }
     // Feature: Allow for custom button texts if it exists for this button:
     $button_text = get_option($this->plugin_name . '_incomplete_text', 'Mark as complete');
     if ( isset( $_POST['old_button_text'] ) && !empty( $_POST['old_button_text'] ) ) {
-      $button_text = $_POST['old_button_text'];
+      $button_text = sanitize_text_field($_POST['old_button_text']);
     }
     $completed_button_text = get_option($this->plugin_name . '_completed_text', 'COMPLETED');
     if ( isset( $_POST['new_button_text'] ) && !empty( $_POST['new_button_text'] ) ) {
-      $completed_button_text = $_POST['new_button_text'];
+      $completed_button_text = sanitize_text_field($_POST['new_button_text']);
     }
     $button_style = '';
     if ( isset( $_POST['style'] ) && !empty( $_POST['style'] ) ) {
-      $button_style = $_POST['style'];
+      $button_style = sanitize_text_field($_POST['style']);
     }
     $button_class = '';
     if ( isset( $_POST['class'] ) && !empty( $_POST['class'] ) ) {
-      $button_class = $_POST['class'];
+      $button_class = sanitize_text_field($_POST['class']);
     }
     
     // update the button
@@ -1051,19 +1051,19 @@ li .wpc-lesson-completed:after { content: "✔"; margin-left: 5px; }
     // Feature: Allow for custom button texts if it exists for this button:
     $button_text = get_option($this->plugin_name . '_incomplete_text', 'Mark as complete');
     if ( isset( $_POST['new_button_text'] ) && !empty( $_POST['new_button_text'] ) ) {
-      $button_text = $_POST['new_button_text'];
+      $button_text = sanitize_text_field($_POST['new_button_text']);
     }
     $completed_button_text = get_option($this->plugin_name . '_completed_text', 'COMPLETED');
     if ( isset( $_POST['old_button_text'] ) && !empty( $_POST['old_button_text'] ) ) {
-      $completed_button_text = $_POST['old_button_text'];
+      $completed_button_text = sanitize_text_field($_POST['old_button_text']);
     }
     $button_style = '';
     if ( isset( $_POST['style'] ) && !empty( $_POST['style'] ) ) {
-      $button_style = $_POST['style'];
+      $button_style = sanitize_text_field($_POST['style']);
     }
     $button_class = '';
     if ( isset( $_POST['class'] ) && !empty( $_POST['class'] ) ) {
-      $button_class = $_POST['class'];
+      $button_class = sanitize_text_field($_POST['class']);
     }
 
     $updates_to_sendback = array( 
@@ -1128,7 +1128,7 @@ li .wpc-lesson-completed:after { content: "✔"; margin-left: 5px; }
       die();
     } else {
       if ( isset( $_REQUEST['redirect'] ) ) {
-        wp_redirect( $_REQUEST['redirect'] );
+        wp_safe_redirect( $_REQUEST['redirect'] );
       } else if ( wp_get_referer() ) {
         wp_safe_redirect( wp_get_referer() );
       } else {
@@ -1872,15 +1872,15 @@ li .wpc-lesson-completed:after { content: "✔"; margin-left: 5px; }
       if ( ! $this->page_is_completed( $page_id ) ) {
         $page = get_post( $page_id );
         $prepend = '';
-        if ( isset( $args['prepend'] ) && !empty( $args['prepend'] ) ) $prepend = $args['prepend'];
+        if ( isset( $args['prepend'] ) && !empty( $args['prepend'] ) ) $prepend = sanitize_text_field($args['prepend']);
         $append = '';
-        if ( isset( $args['append'] ) && !empty( $args['append'] ) ) $append = $args['append'];
+        if ( isset( $args['append'] ) && !empty( $args['append'] ) ) $append = sanitize_text_field($args['append']);
 
         $post_url = esc_url( get_permalink( $page ) );
 
         $post_title = '';
         if ( isset( $args['button_text'] ) && !empty( $args['button_text'] ) ) {
-          $post_title = $args['button_text'];
+          $post_title = sanitize_text_field($args['button_text']);
         } else {
           $post_title = $page->post_title;
         }
@@ -1925,7 +1925,7 @@ li .wpc-lesson-completed:after { content: "✔"; margin-left: 5px; }
       echo json_encode( array( ), JSON_UNESCAPED_UNICODE );
     } else {
       $not_found = '';
-      if ( isset( $args['not_found'] ) && !empty( $args['not_found'] ) ) $not_found = $args['not_found'];
+      if ( isset( $args['not_found'] ) && !empty( $args['not_found'] ) ) $not_found = sanitize_text_field($args['not_found']);
       $class .= ' wpc-nav-next-to-complete-not-found';
       include 'partials/wpcomplete-public-nav-link-not-found.php';
     }
@@ -1991,15 +1991,15 @@ li .wpc-lesson-completed:after { content: "✔"; margin-left: 5px; }
       $last_page = get_post( $last_page_id );
 
       $prepend = '';
-      if ( isset( $args['prepend'] ) && !empty( $args['prepend'] ) ) $prepend = $args['prepend'];
+      if ( isset( $args['prepend'] ) && !empty( $args['prepend'] ) ) $prepend = sanitize_text_field($args['prepend']);
       $append = '';
-      if ( isset( $args['append'] ) && !empty( $args['append'] ) ) $append = $args['append'];
+      if ( isset( $args['append'] ) && !empty( $args['append'] ) ) $append = sanitize_text_field($args['append']);
 
       $post_url = esc_url( get_permalink( $last_page ) );
       
       $post_title = '';
       if ( isset( $args['button_text'] ) && !empty( $args['button_text'] ) ) {
-        $post_title = $args['button_text'];
+        $post_title = sanitize_text_field($args['button_text']);
       } else {
         $post_title = $last_page->post_title;
       }
@@ -2038,7 +2038,7 @@ li .wpc-lesson-completed:after { content: "✔"; margin-left: 5px; }
         echo json_encode( array( ), JSON_UNESCAPED_UNICODE );
       } else {
         $not_found = '';
-        if ( isset( $args['not_found'] ) && !empty( $args['not_found'] ) ) $not_found = $args['not_found'];
+        if ( isset( $args['not_found'] ) && !empty( $args['not_found'] ) ) $not_found = sanitize_text_field($args['not_found']);
         $class .= ' wpc-nav-last-completed-not-found';
         include 'partials/wpcomplete-public-nav-link-not-found.php';
       }
@@ -2088,15 +2088,15 @@ li .wpc-lesson-completed:after { content: "✔"; margin-left: 5px; }
     $class = 'wpc-nav-next-page';
     if ( $next_page ) {
       $prepend = '';
-      if ( isset( $args['prepend'] ) && !empty( $args['prepend'] ) ) $prepend = $args['prepend'];
+      if ( isset( $args['prepend'] ) && !empty( $args['prepend'] ) ) $prepend = sanitize_text_field($args['prepend']);
       $append = '';
-      if ( isset( $args['append'] ) && !empty( $args['append'] ) ) $append = $args['append'];
+      if ( isset( $args['append'] ) && !empty( $args['append'] ) ) $append = sanitize_text_field($args['append']);
 
       $post_url = esc_url( get_permalink( $next_page ) );
       
       $post_title = '';
       if ( isset( $args['button_text'] ) && !empty( $args['button_text'] ) ) {
-        $post_title = $args['button_text'];
+        $post_title = sanitize_text_field($args['button_text']);
       } else {
         $post_title = $next_page->post_title;
       }
@@ -2134,7 +2134,7 @@ li .wpc-lesson-completed:after { content: "✔"; margin-left: 5px; }
         echo json_encode( array( ), JSON_UNESCAPED_UNICODE );
       } else {
         $not_found = '';
-        if ( isset( $args['not_found'] ) && !empty( $args['not_found'] ) ) $not_found = $args['not_found'];
+        if ( isset( $args['not_found'] ) && !empty( $args['not_found'] ) ) $not_found = sanitize_text_field($args['not_found']);
         $class .= ' wpc-nav-next-page-not-found';
         include 'partials/wpcomplete-public-nav-link-not-found.php';
       }
@@ -2184,15 +2184,15 @@ li .wpc-lesson-completed:after { content: "✔"; margin-left: 5px; }
     $class = 'wpc-nav-previous-page';
     if ( $prev_page ) {
       $prepend = '';
-      if ( isset( $args['prepend'] ) && !empty( $args['prepend'] ) ) $prepend = $args['prepend'];
+      if ( isset( $args['prepend'] ) && !empty( $args['prepend'] ) ) $prepend = sanitize_text_field($args['prepend']);
       $append = '';
-      if ( isset( $args['append'] ) && !empty( $args['append'] ) ) $append = $args['append'];
+      if ( isset( $args['append'] ) && !empty( $args['append'] ) ) $append = sanitize_text_field($args['append']);
 
       $post_url = esc_url( get_permalink( $prev_page ) );
 
       $post_title = '';
       if ( isset( $args['button_text'] ) && !empty( $args['button_text'] ) ) {
-        $post_title = $args['button_text'];
+        $post_title = sanitize_text_field($args['button_text']);
       } else {
         $post_title = $prev_page->post_title;
       }
@@ -2230,7 +2230,7 @@ li .wpc-lesson-completed:after { content: "✔"; margin-left: 5px; }
         echo json_encode( array( ), JSON_UNESCAPED_UNICODE );
       } else {
         $not_found = '';
-        if ( isset( $args['not_found'] ) && !empty( $args['not_found'] ) ) $not_found = $args['not_found'];
+        if ( isset( $args['not_found'] ) && !empty( $args['not_found'] ) ) $not_found = sanitize_text_field($args['not_found']);
         $class .= ' wpc-nav-previous-page-not-found';
         include 'partials/wpcomplete-public-nav-link-not-found.php';
       }
@@ -2500,32 +2500,32 @@ li .wpc-lesson-completed:after { content: "✔"; margin-left: 5px; }
 
     $text = 'Reset Your Data';
     if ( isset( $atts['text'] ) && !empty( $atts['text'] ) ) {
-      $text = $atts['text'];
+      $text = sanitize_text_field($atts['text']);
     }
     $course = false;
     if ( isset( $atts['course'] ) && !empty( $atts['course'] ) ) {
-      $course = $atts['course'];
+      $course = sanitize_text_field($atts['course']);
       $reset_url = admin_url( 'admin-post.php?action=reset&course=' . $course);
     }
     $classes = '';
     if ( isset( $atts['class'] ) && !empty( $atts['class'] ) ) {
-      $classes = $atts['class'];
+      $classes = sanitize_text_field($atts['class']);
     }
     $confirm_message = "Are you sure you want to reset your data? This can not be undone.";
     if ( isset( $atts['confirm'] ) ) {
-      $confirm_message = $atts['confirm'];
+      $confirm_message = sanitize_text_field($atts['confirm']);
     }
     $success_text = "Your account data was successfully removed.";
     if ( isset( $atts['success_text'] ) ) {
-      $success_text = $atts['success_text'];
+      $success_text = sanitize_text_field($atts['success_text']);
     }
     $failure_text = "Unfortunately, there was an error while trying to delete your completion data. Please try again or notify the site owner.";
     if ( isset( $atts['failure_text'] ) ) {
-      $failure_text = $atts['failure_text'];
+      $failure_text = sanitize_text_field($atts['failure_text']);
     }
     $no_change_text = "Completion data has already been deleted.";
     if ( isset( $atts['no_change_text'] ) ) {
-      $no_change_text = $atts['no_change_text'];
+      $no_change_text = sanitize_text_field($atts['no_change_text']);
     }
 
     // add a nonce
@@ -2579,7 +2579,7 @@ li .wpc-lesson-completed:after { content: "✔"; margin-left: 5px; }
         } else {
           // TODO: how do we handle multiple buttons?
           // redirect back to referral page
-          wp_redirect( add_query_arg('wpc_reset', 'no-change', $wp_ref ) );
+          wp_safe_redirect( add_query_arg('wpc_reset', 'no-change', $wp_ref ) );
           return;
         }
       }
@@ -2610,7 +2610,7 @@ li .wpc-lesson-completed:after { content: "✔"; margin-left: 5px; }
         } else {
           // TODO: how do we handle multiple buttons?
           // redirect back to referral page
-          wp_redirect( add_query_arg('wpc_reset', 'no-change', $wp_ref ) );
+          wp_safe_redirect( add_query_arg('wpc_reset', 'no-change', $wp_ref ) );
           return;
         }
       } else {
