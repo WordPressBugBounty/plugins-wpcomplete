@@ -112,20 +112,20 @@ class Ithemes_Updater_Settings_Page {
 		$GLOBALS['ithemes-updater-settings']->flush( 'settings saved' );
 
 
-		$this->messages[] = __( 'Settings saved', 'wpcomplete' );
+		$this->messages[] = __( 'Settings saved', 'LION' );
 	}
 
 	private function license_packages( $data ) {
 		check_admin_referer( 'license_packages', 'ithemes_updater_nonce' );
 
 		if ( empty( $data['username'] ) && empty( $data['password'] ) )
-			$this->errors[] = __( 'You must supply an iThemes membership username and password in order to license products.', 'wpcomplete' );
+			$this->errors[] = __( 'You must supply an iThemes membership username and password in order to license products.', 'LION' );
 		else if ( empty( $data['username'] ) )
-			$this->errors[] = __( 'You must supply an iThemes membership username in order to license products.', 'wpcomplete' );
+			$this->errors[] = __( 'You must supply an iThemes membership username in order to license products.', 'LION' );
 		else if ( empty( $data['password'] ) )
-			$this->errors[] = __( 'You must supply an iThemes membership password in order to license products.', 'wpcomplete' );
+			$this->errors[] = __( 'You must supply an iThemes membership password in order to license products.', 'LION' );
 		else if ( empty( $data['packages'] ) )
-			$this->errors[] = __( 'You must select at least one product to license. Ensure that you select the products that you wish to license in the listing below.', 'wpcomplete' );
+			$this->errors[] = __( 'You must select at least one product to license. Ensure that you select the products that you wish to license in the listing below.', 'LION' );
 
 		if ( ! empty( $this->errors ) )
 			return;
@@ -140,7 +140,7 @@ class Ithemes_Updater_Settings_Page {
 		}
 
 		if ( empty( $response['packages'] ) ) {
-			$this->errors[] = __( 'An unknown server error occurred. Please try to license your products again at another time.', 'wpcomplete' );
+			$this->errors[] = __( 'An unknown server error occurred. Please try to license your products again at another time.', 'LION' );
 			return;
 		}
 
@@ -160,23 +160,23 @@ class Ithemes_Updater_Settings_Page {
 			if ( ! empty( $data['key'] ) )
 				$success[] = $name;
 			else if ( ! empty( $data['status'] ) && ( 'expired' == $data['status'] ) )
-				$warn[$name] = __( 'Your product subscription has expired', 'wpcomplete' );
+				$warn[$name] = __( 'Your product subscription has expired', 'LION' );
 			else
 				$fail[$name] = $data['error']['message'];
 		}
 
 
 		if ( ! empty( $success ) )
-			$this->messages[] = wp_sprintf( __( 'Successfully licensed %l.', 'wpcomplete' ), $success );
+			$this->messages[] = wp_sprintf( __( 'Successfully licensed %l.', 'LION' ), $success );
 
 		if ( ! empty( $fail ) ) {
 			foreach ( $fail as $name => $reason )
-				$this->errors[] = sprintf( __( 'Unable to license %1$s. Reason: %2$s', 'wpcomplete' ), $name, $reason );
+				$this->errors[] = sprintf( __( 'Unable to license %1$s. Reason: %2$s', 'LION' ), $name, $reason );
 		}
 
 		if ( ! empty( $warn ) ) {
 			foreach ( $warn as $name => $reason )
-				$this->soft_errors[] = sprintf( __( 'Unable to license %1$s. Reason: %2$s', 'wpcomplete' ), $name, $reason );
+				$this->soft_errors[] = sprintf( __( 'Unable to license %1$s. Reason: %2$s', 'LION' ), $name, $reason );
 		}
 	}
 
@@ -184,13 +184,13 @@ class Ithemes_Updater_Settings_Page {
 		check_admin_referer( 'unlicense_packages', 'ithemes_updater_nonce' );
 
 		if ( empty( $data['username'] ) && empty( $data['password'] ) )
-			$this->errors[] = __( 'You must supply an iThemes membership username and password in order to remove licenses.', 'wpcomplete' );
+			$this->errors[] = __( 'You must supply an iThemes membership username and password in order to remove licenses.', 'LION' );
 		else if ( empty( $data['username'] ) )
-			$this->errors[] = __( 'You must supply an iThemes membership username in order to remove licenses.', 'wpcomplete' );
+			$this->errors[] = __( 'You must supply an iThemes membership username in order to remove licenses.', 'LION' );
 		else if ( empty( $data['password'] ) )
-			$this->errors[] = __( 'You must supply an iThemes membership password in order to remove licenses.', 'wpcomplete' );
+			$this->errors[] = __( 'You must supply an iThemes membership password in order to remove licenses.', 'LION' );
 		else if ( empty( $data['packages'] ) )
-			$this->errors[] = __( 'You must select at least one license to remove. Ensure that you select the licenses that you wish to remove in the listing below.', 'wpcomplete' );
+			$this->errors[] = __( 'You must select at least one license to remove. Ensure that you select the licenses that you wish to remove in the listing below.', 'LION' );
 
 		if ( ! empty( $this->errors ) )
 			return;
@@ -205,7 +205,7 @@ class Ithemes_Updater_Settings_Page {
 		}
 
 		if ( empty( $response['packages'] ) ) {
-			$this->errors[] = __( 'An unknown server error occurred. Please try to remove licenses from your products again at another time.', 'wpcomplete' );
+			$this->errors[] = __( 'An unknown server error occurred. Please try to remove licenses from your products again at another time.', 'LION' );
 			return;
 		}
 
@@ -226,16 +226,16 @@ class Ithemes_Updater_Settings_Page {
 			else if ( isset( $data['error'] ) && isset( $data['error']['message'] ) )
 				$fail[$name] = $data['error']['message'];
 			else
-				$fail[$name] = __( 'Unknown server error.', 'wpcomplete' );
+				$fail[$name] = __( 'Unknown server error.', 'LION' );
 		}
 
 
 		if ( ! empty( $success ) )
-			$this->messages[] = wp_sprintf( _n( 'Successfully removed license from %l.', 'Successfully removed licenses from %l.', count( $success ), 'wpcomplete' ), $success );
+			$this->messages[] = wp_sprintf( _n( 'Successfully removed license from %l.', 'Successfully removed licenses from %l.', count( $success ), 'LION' ), $success );
 
 		if ( ! empty( $fail ) ) {
 			foreach ( $fail as $name => $reason )
-				$this->errors[] = sprintf( __( 'Unable to remove license from %1$s. Reason: %2$s', 'wpcomplete' ), $name, $reason );
+				$this->errors[] = sprintf( __( 'Unable to remove license from %1$s. Reason: %2$s', 'LION' ), $name, $reason );
 		}
 	}
 
@@ -262,7 +262,7 @@ class Ithemes_Updater_Settings_Page {
 
 
 		if ( ! empty( $_REQUEST['updated_url'] ) ) {
-			$this->messages[] = __( 'Successfully updated the Licensed URL.', 'wpcomplete' );
+			$this->messages[] = __( 'Successfully updated the Licensed URL.', 'LION' );
 		}
 
 
@@ -271,7 +271,7 @@ class Ithemes_Updater_Settings_Page {
 
 ?>
 	<div class="wrap">
-		<h2><?php _e( 'iThemes Licensing', 'wpcomplete' ); ?></h2>
+		<h2><?php _e( 'iThemes Licensing', 'LION' ); ?></h2>
 
 		<?php
 			$this->list_licensed_products( $licensed, $post_data, $action );
@@ -292,47 +292,47 @@ class Ithemes_Updater_Settings_Page {
 		<?php wp_nonce_field( 'save_settings', 'ithemes_updater_nonce' ); ?>
 
 		<div id="ithemes-updater-settings">
-			<h3 class="subtitle"><?php _e( 'Settings', 'wpcomplete' ); ?></h3>
+			<h3 class="subtitle"><?php _e( 'Settings', 'LION' ); ?></h3>
 
 			<table class="form-table">
 				<tbody>
 					<tr valign="top">
 						<th scope="row">
-							<?php _e( 'Licensed URL', 'wpcomplete' ); ?>
+							<?php _e( 'Licensed URL', 'LION' ); ?>
 						</th>
 						<td>
 							<p>
 								<code><?php echo $GLOBALS['ithemes-updater-settings']->get_licensed_site_url(); ?></code>
-								<a href="<?php echo admin_url( 'options-general.php?page=ithemes-licensing&action=change_licensed_site_url' ); ?>" class="button button-primary"><?php _e( 'Change', 'wpcomplete' ); ?></a>
+								<a href="<?php echo admin_url( 'options-general.php?page=ithemes-licensing&action=change_licensed_site_url' ); ?>" class="button button-primary"><?php _e( 'Change', 'LION' ); ?></a>
 							</p>
 
 							<?php if ( is_multisite() ) : ?>
-								<p class="description"><?php _e( 'The Licensed URL should be the primary URL of this WordPress network. If this is not set correctly, some features may not function as expected.', 'wpcomplete' ); ?></p>
+								<p class="description"><?php _e( 'The Licensed URL should be the primary URL of this WordPress network. If this is not set correctly, some features may not function as expected.', 'LION' ); ?></p>
 							<?php else : ?>
-								<p class="description"><?php _e( 'The Licensed URL should be the primary URL of this WordPress site. If this is not set correctly, some features may not function as expected.', 'wpcomplete' ); ?></p>
+								<p class="description"><?php _e( 'The Licensed URL should be the primary URL of this WordPress site. If this is not set correctly, some features may not function as expected.', 'LION' ); ?></p>
 							<?php endif; ?>
 						</td>
 					</tr>
 					<tr valign="top">
 						<th scope="row">
-							<label for="quick_releases"><?php _e( 'Quick Release Updates', 'wpcomplete' ); ?></label>
+							<label for="quick_releases"><?php _e( 'Quick Release Updates', 'LION' ); ?></label>
 						</th>
 						<td>
 							<?php $checked = ( $quick_releases ) ? ' checked="checked"' : ''; ?>
 
 							<label>
 								<input id="quick_releases" type="checkbox" name="quick_releases" value="1" <?php echo $checked; ?>/>
-								<?php _e( 'Enable quick release updates', 'wpcomplete' ); ?>
+								<?php _e( 'Enable quick release updates', 'LION' ); ?>
 							</label>
 
-							<p class="description"><?php _e( 'Some products have quick releases that are created to solve specific issues that some users experience. In order to avoid causing users to have updates show up too frequently, automatic updates to these quick releases are disabled by default. Enabling this feature allows quick releases to be available to the automatic update system. Using this option is only recommended if support has requested that you enable it in order to receive a quick release. You should disable this option at a later time after confirming that the quick release solves the issue for you.', 'wpcomplete' ); ?></p>
+							<p class="description"><?php _e( 'Some products have quick releases that are created to solve specific issues that some users experience. In order to avoid causing users to have updates show up too frequently, automatic updates to these quick releases are disabled by default. Enabling this feature allows quick releases to be available to the automatic update system. Using this option is only recommended if support has requested that you enable it in order to receive a quick release. You should disable this option at a later time after confirming that the quick release solves the issue for you.', 'LION' ); ?></p>
 						</td>
 					</tr>
 				</tbody>
 			</table>
 
 			<p class="submit">
-				<input id="save_settings" class="button button-primary" type="submit" value="<?php _e( 'Save Settings', 'wpcomplete' ); ?>" />
+				<input id="save_settings" class="button button-primary" type="submit" value="<?php _e( 'Save Settings', 'LION' ); ?>" />
 				<input type="hidden" name="action" value="save_settings" />
 			</p>
 		</div>
@@ -351,10 +351,10 @@ class Ithemes_Updater_Settings_Page {
 		$time = time();
 
 		$headings = array(
-			__( 'Product', 'wpcomplete' ),
-			__( 'Member', 'wpcomplete' ),
-			__( 'Expiration', 'wpcomplete' ),
-			__( 'Remaining Licenses', 'wpcomplete' ),
+			__( 'Product', 'LION' ),
+			__( 'Member', 'LION' ),
+			__( 'Expiration', 'LION' ),
+			__( 'Remaining Licenses', 'LION' ),
 		);
 
 		if ( ( 'unlicense_packages' != $action ) || empty( $this->errors ) ) {
@@ -370,7 +370,7 @@ class Ithemes_Updater_Settings_Page {
 		<?php wp_nonce_field( 'unlicense_packages', 'ithemes_updater_nonce' ); ?>
 
 		<div class="ithemes-updater-products" id="ithemes-updater-licensed">
-			<h3 class="subtitle"><?php _e( 'Licensed Products', 'wpcomplete' ); ?></h3>
+			<h3 class="subtitle"><?php _e( 'Licensed Products', 'LION' ); ?></h3>
 
 			<table class="ithemes-updater-listing widefat">
 				<thead>
@@ -382,12 +382,12 @@ class Ithemes_Updater_Settings_Page {
 							</label>
 						</th>
 						<th scope="col">
-							<label for="cb-select-all-1"><?php _e( 'Product', 'wpcomplete' ); ?></label>
+							<label for="cb-select-all-1"><?php _e( 'Product', 'LION' ); ?></label>
 						</th>
-						<th scope="col"><?php _e( 'Member', 'wpcomplete' ); ?></th>
-						<th scope="col"><?php _e( 'Product Status', 'wpcomplete' ); ?></th>
-						<th scope="col"><?php _e( 'Expiration', 'wpcomplete' ); ?></th>
-						<th scope="col"><?php _e( 'Remaining Licenses', 'wpcomplete' ); ?></th>
+						<th scope="col"><?php _e( 'Member', 'LION' ); ?></th>
+						<th scope="col"><?php _e( 'Product Status', 'LION' ); ?></th>
+						<th scope="col"><?php _e( 'Expiration', 'LION' ); ?></th>
+						<th scope="col"><?php _e( 'Remaining Licenses', 'LION' ); ?></th>
 					</tr>
 				</thead>
 				<tbody>
@@ -395,12 +395,12 @@ class Ithemes_Updater_Settings_Page {
 					<?php foreach ( $products as $name => $data ) : ?>
 						<?php
 							if ( -1 == $data['total'] )
-								$remaining = __( 'unlimited', 'wpcomplete' );
+								$remaining = __( 'unlimited', 'LION' );
 							else
 								$remaining = $data['total'] - $data['used'];
 
 //							if ( 0 == $remaining )
-//								$remaining .= ' <a class="button-secondary upgrade">' . __( 'Upgrade', 'wpcomplete' ) . '</a>';
+//								$remaining .= ' <a class="button-secondary upgrade">' . __( 'Upgrade', 'LION' ) . '</a>';
 
 
 							$expiration = $this->get_expiration_string( $data['expiration'] );
@@ -456,7 +456,7 @@ class Ithemes_Updater_Settings_Page {
 						<td colspan="6">
 							<input type="text" name="it-updater-username" placeholder="iThemes Username" value="<?php echo esc_attr( $post_data['username'] ); ?>" autocomplete="off" />
 							<input type="password" name="it-updater-password" placeholder="Password" value="<?php echo esc_attr( $post_data['password'] ); ?>" />
-							<input class="button-primary" type="submit" name="submit" value="<?php _e( 'Remove Licenses', 'wpcomplete' ); ?>" />
+							<input class="button-primary" type="submit" name="submit" value="<?php _e( 'Remove Licenses', 'LION' ); ?>" />
 							<input type="hidden" name="action" value="unlicense_packages" />
 						</td>
 					</tr>
@@ -490,11 +490,11 @@ class Ithemes_Updater_Settings_Page {
 		<?php wp_nonce_field( 'license_packages', 'ithemes_updater_nonce' ); ?>
 
 		<div class="ithemes-updater-products" id="ithemes-updater-unlicensed">
-			<h3 class="subtitle"><?php _e( 'Unlicensed Products', 'wpcomplete' ); ?></h3>
+			<h3 class="subtitle"><?php _e( 'Unlicensed Products', 'LION' ); ?></h3>
 
-			<p><?php _e( 'The following products have not been licensed. Licensing a product gives you access to automatic updates from within WordPress.', 'wpcomplete' ); ?></p>
-			<p><?php _e( 'To license products, select the products you wish to license, enter your iThemes membership username and password, and press the License Products button.', 'wpcomplete' ); ?></p>
-			<p><?php printf( __( 'Need help? <a href="%s">Click here for a quick video tutorial</a>.', 'wpcomplete' ), 'https://ithemes.com/licensing/' ); ?></p>
+			<p><?php _e( 'The following products have not been licensed. Licensing a product gives you access to automatic updates from within WordPress.', 'LION' ); ?></p>
+			<p><?php _e( 'To license products, select the products you wish to license, enter your iThemes membership username and password, and press the License Products button.', 'LION' ); ?></p>
+			<p><?php printf( __( 'Need help? <a href="%s">Click here for a quick video tutorial</a>.', 'LION' ), 'https://ithemes.com/licensing/' ); ?></p>
 
 			<table class="ithemes-updater-listing widefat">
 				<thead>
@@ -506,7 +506,7 @@ class Ithemes_Updater_Settings_Page {
 							</label>
 						</th>
 						<th scope="col">
-							<label for="cb-select-all-2"><?php _e( 'Product', 'wpcomplete' ); ?></label>
+							<label for="cb-select-all-2"><?php _e( 'Product', 'LION' ); ?></label>
 						</th>
 					</tr>
 				</thead>
@@ -546,7 +546,7 @@ class Ithemes_Updater_Settings_Page {
 						<td colspan="2">
 							<input type="text" name="it-updater-username" placeholder="iThemes Username" value="<?php echo esc_attr( $post_data['username'] ); ?>" autocomplete="off" />
 							<input type="password" name="it-updater-password" placeholder="Password" value="<?php echo esc_attr( $post_data['password'] ); ?>" />
-							<input class="button-primary" type="submit" name="submit" value="<?php _e( 'License Products', 'wpcomplete' ); ?>" />
+							<input class="button-primary" type="submit" name="submit" value="<?php _e( 'License Products', 'LION' ); ?>" />
 							<input type="hidden" name="action" value="license_packages" />
 						</td>
 					</tr>
@@ -566,19 +566,19 @@ class Ithemes_Updater_Settings_Page {
 
 ?>
 	<div class="ithemes-updater-products" id="ithemes-updater-unrecognized">
-		<h3 class="subtitle"><?php _e( 'Unrecognized Products', 'wpcomplete' ); ?></h3>
+		<h3 class="subtitle"><?php _e( 'Unrecognized Products', 'LION' ); ?></h3>
 
-		<p><?php _e( 'The following products were not recognized by the licensing system. This can be due to a bug in the product code, a temporary server issue, or because the product is no longer supported.', 'wpcomplete' ); ?></p>
-		<p><?php printf( __( 'Please check this page again at a later time to see if the problem resolves itself. If the product remains, please contact <a href="%s">iThemes support</a> and provide them with the details given below.', 'wpcomplete' ), 'https://ithemes.com/support/' ); ?></p>
+		<p><?php _e( 'The following products were not recognized by the licensing system. This can be due to a bug in the product code, a temporary server issue, or because the product is no longer supported.', 'LION' ); ?></p>
+		<p><?php printf( __( 'Please check this page again at a later time to see if the problem resolves itself. If the product remains, please contact <a href="%s">iThemes support</a> and provide them with the details given below.', 'LION' ), 'https://ithemes.com/support/' ); ?></p>
 
 		<table class="ithemes-updater-listing widefat">
 			<thead>
 				<tr>
-					<th scope="col"><?php _e( 'Product', 'wpcomplete' ); ?></th>
-					<th scope="col"><?php _e( 'Type', 'wpcomplete' ); ?></th>
-					<th scope="col"><?php _e( 'Package', 'wpcomplete' ); ?></th>
-					<th scope="col"><?php _e( 'Version', 'wpcomplete' ); ?></th>
-					<th scope="col"><?php _e( 'Server Response', 'wpcomplete' ); ?></th>
+					<th scope="col"><?php _e( 'Product', 'LION' ); ?></th>
+					<th scope="col"><?php _e( 'Type', 'LION' ); ?></th>
+					<th scope="col"><?php _e( 'Package', 'LION' ); ?></th>
+					<th scope="col"><?php _e( 'Version', 'LION' ); ?></th>
+					<th scope="col"><?php _e( 'Server Response', 'LION' ); ?></th>
 				</tr>
 			</thead>
 			<tbody>
@@ -588,7 +588,7 @@ class Ithemes_Updater_Settings_Page {
 						if ( ( isset( $data['status'] ) && 'error' == $data['status'] ) && ( ! empty( $data['error']['message'] ) ) )
 							$response = "{$data['error']['message']} ({$data['error']['code']})";
 						else
-							$response = __( 'Unknown Error', 'wpcomplete' );
+							$response = __( 'Unknown Error', 'LION' );
 
 						if ( ++$count % 2 ) {
 							$class = 'alt';
@@ -640,9 +640,9 @@ class Ithemes_Updater_Settings_Page {
 ?>
 	<div class="wrap" id="ithemes-updater-site-url-confirmation">
 		<span class="ithemes-updater-header"></span>
-		<h2><?php _e( 'Licensing', 'wpcomplete' ); ?></h2>
+		<h2><?php _e( 'Licensing', 'LION' ); ?></h2>
 
-		<p><?php _e( "Please confirm this site's licensed URL.", 'wpcomplete' ); ?></p>
+		<p><?php _e( "Please confirm this site's licensed URL.", 'LION' ); ?></p>
 
 		<form id="posts-filter" enctype="multipart/form-data" method="post" action="<?php echo $this->self_url; ?>">
 			<?php wp_nonce_field( 'save_licensed_site_url', 'ithemes_updater_nonce' ); ?>
@@ -653,14 +653,14 @@ class Ithemes_Updater_Settings_Page {
 						<tbody>
 							<tr valign="top">
 								<th scope="row">
-									<label for="site_url"><?php _e( 'Licensed URL', 'wpcomplete' ); ?></label>
+									<label for="site_url"><?php _e( 'Licensed URL', 'LION' ); ?></label>
 
 									<?php if ( is_multisite() ) : ?>
-										<p class="description"><?php _e( 'The Licensed URL should be the primary URL of this WordPress network.', 'wpcomplete' ); ?></p>
-										<p class="description ithemes-updater-description-warning"><?php _e( 'If not set correctly, some features may not function as expected.', 'wpcomplete' ); ?></p>
+										<p class="description"><?php _e( 'The Licensed URL should be the primary URL of this WordPress network.', 'LION' ); ?></p>
+										<p class="description ithemes-updater-description-warning"><?php _e( 'If not set correctly, some features may not function as expected.', 'LION' ); ?></p>
 									<?php else : ?>
-										<p class="description"><?php _e( 'The Licensed URL should be the primary URL of this WordPress site.', 'wpcomplete' ); ?></p>
-										<p class="description ithemes-updater-description-warning"><?php _e( 'If not set correctly, some features may not function as expected.', 'wpcomplete' ); ?></p>
+										<p class="description"><?php _e( 'The Licensed URL should be the primary URL of this WordPress site.', 'LION' ); ?></p>
+										<p class="description ithemes-updater-description-warning"><?php _e( 'If not set correctly, some features may not function as expected.', 'LION' ); ?></p>
 									<?php endif; ?>
 								</th>
 								<td>
@@ -674,7 +674,7 @@ class Ithemes_Updater_Settings_Page {
 				</div>
 
 				<p class="submit">
-					<input id="save_licensed_site_url" class="button button-primary" type="submit" value="<?php _e( 'Save', 'wpcomplete' ); ?>" />
+					<input id="save_licensed_site_url" class="button button-primary" type="submit" value="<?php _e( 'Save', 'LION' ); ?>" />
 					<input type="hidden" name="action" value="save_licensed_site_url" />
 					<input type="hidden" name="redirect" value="<?php echo esc_attr( $redirect ); ?>" />
 				</p>
@@ -689,9 +689,9 @@ class Ithemes_Updater_Settings_Page {
 		check_admin_referer( 'save_licensed_site_url', 'ithemes_updater_nonce' );
 
 		if ( empty( $data['site_url'] ) ) {
-			$this->errors[] = __( 'The licensed URL cannot be blank.', 'wpcomplete' );
+			$this->errors[] = __( 'The licensed URL cannot be blank.', 'LION' );
 		} else if ( false === filter_var( $data['site_url'], FILTER_VALIDATE_URL ) ) {
-			$this->errors[] = __( 'The licensed URL must be a valid URL.', 'wpcomplete' );
+			$this->errors[] = __( 'The licensed URL must be a valid URL.', 'LION' );
 		}
 
 		if ( ! empty( $this->errors ) ) {
@@ -714,7 +714,7 @@ class Ithemes_Updater_Settings_Page {
 
 
 		$GLOBALS['ithemes-updater-settings']->set_licensed_site_url( $site_url );
-		$this->messages[] = __( 'Successfully set the Licensed URL.', 'wpcomplete' );
+		$this->messages[] = __( 'Successfully set the Licensed URL.', 'LION' );
 
 		if ( empty( $data['redirect'] ) ) {
 			$redirect = admin_url( 'options-general.php?page=ithemes-licensing&updated_url=true' );
@@ -745,9 +745,9 @@ class Ithemes_Updater_Settings_Page {
 ?>
 	<div class="wrap" id="ithemes-updater-relicense">
 		<span class="ithemes-updater-header"></span>
-		<h2><?php _e( 'Licensing', 'wpcomplete' ); ?></h2>
+		<h2><?php _e( 'Licensing', 'LION' ); ?></h2>
 
-		<p><?php printf( __( 'The licenses on this site are for <code>%s</code>.', 'wpcomplete' ), $site_url_from_server ); ?></p>
+		<p><?php printf( __( 'The licenses on this site are for <code>%s</code>.', 'LION' ), $site_url_from_server ); ?></p>
 
 		<form id="posts-filter" enctype="multipart/form-data" method="post" action="<?php echo $this->self_url; ?>">
 			<?php wp_nonce_field( 'relicense', 'ithemes_updater_nonce' ); ?>
@@ -759,42 +759,42 @@ class Ithemes_Updater_Settings_Page {
 							<tr valign="top">
 								<th scope="row">
 									<label for="relicense_option">
-										<?php _e( 'License Option', 'wpcomplete' ); ?>
+										<?php _e( 'License Option', 'LION' ); ?>
 									</label>
 								</th>
 								<td>
 									<p>
 										<label>
 											<input type="radio" name="relicense_option" value="relicense" <?php if ( 'relicense' === $data['relicense_option'] ) echo 'checked="checked"'; ?> />
-											<?php _e( 'Create new licenses for this site.', 'wpcomplete' ); ?>
+											<?php _e( 'Create new licenses for this site.', 'LION' ); ?>
 										</label>
 									</p>
-									<p class="description ithemes-updater-description-warning"><?php _e( 'Use this option if this site was cloned from another site and needs to have its own licenses.', 'wpcomplete' ); ?></p>
+									<p class="description ithemes-updater-description-warning"><?php _e( 'Use this option if this site was cloned from another site and needs to have its own licenses.', 'LION' ); ?></p>
 									<br />
 
 									<p>
 										<label>
 											<input type="radio" name="relicense_option" value="update" <?php if ( 'update' === $data['relicense_option'] ) echo 'checked="checked"'; ?> />
-											<?php printf( __( 'Change the existing licenses to be for <code>%s</code>.', 'wpcomplete' ), $data['site_url'] ); ?>
+											<?php printf( __( 'Change the existing licenses to be for <code>%s</code>.', 'LION' ), $data['site_url'] ); ?>
 										</label>
 									</p>
 									<p class="description ithemes-updater-description-notice">
 										<span class="dashicons dashicons-warning"></span>
-										<?php printf( __( 'Note: If the <code>%s</code> site still exists and is different from this site, you will have to create new licenses on that site.', 'wpcomplete' ), $data['site_url'], $site_url_from_server ); ?>
+										<?php printf( __( 'Note: If the <code>%s</code> site still exists and is different from this site, you will have to create new licenses on that site.', 'LION' ), $data['site_url'], $site_url_from_server ); ?>
 									</p>
-									<p class="description ithemes-updater-description-warning"><?php printf( __( 'Use this option if this site\'s primary URL has changed from <code>%1$s</code> to <code>%2$s</code>.', 'wpcomplete' ), $site_url_from_server, $data['site_url'] ); ?></p>
+									<p class="description ithemes-updater-description-warning"><?php printf( __( 'Use this option if this site\'s primary URL has changed from <code>%1$s</code> to <code>%2$s</code>.', 'LION' ), $site_url_from_server, $data['site_url'] ); ?></p>
 								</td>
 							</tr>
 							<tr valign="top">
 								<th scope="row" colspan="2">
-									<label for="it-updater-username"><?php _e( 'iThemes Username', 'wpcomplete' ); ?></label>
+									<label for="it-updater-username"><?php _e( 'iThemes Username', 'LION' ); ?></label>
 									<br />
 									<input id="it-updater-username" type="text" name="it-updater-username" value="<?php echo esc_attr( $data['username'] ); ?>" />
 								</th>
 							</tr>
 							<tr valign="top">
 								<th scope="row" colspan="2">
-									<label for="it-updater-password"><?php _e( 'iThemes Password', 'wpcomplete' ); ?></label>
+									<label for="it-updater-password"><?php _e( 'iThemes Password', 'LION' ); ?></label>
 									<br />
 									<input id="it-updater-password" type="password" name="it-updater-password" value="<?php echo esc_attr( $data['password'] ); ?>" />
 								</th>
@@ -804,7 +804,7 @@ class Ithemes_Updater_Settings_Page {
 				</div>
 
 				<p class="submit">
-					<input id="relicense" class="button button-primary" type="submit" value="<?php _e( 'Save', 'wpcomplete' ); ?>" />
+					<input id="relicense" class="button button-primary" type="submit" value="<?php _e( 'Save', 'LION' ); ?>" />
 					<input type="hidden" name="action" value="relicense" />
 					<input type="hidden" name="site_url" value="<?php echo esc_attr( $data['site_url'] ); ?>" />
 					<input type="hidden" name="redirect" value="<?php echo esc_attr( $data['redirect'] ); ?>" />
@@ -820,17 +820,17 @@ class Ithemes_Updater_Settings_Page {
 		check_admin_referer( 'relicense', 'ithemes_updater_nonce' );
 
 		if ( empty( $data['username'] ) && empty( $data['password'] ) ) {
-			$this->errors[] = __( 'You must supply an iThemes membership username and password in order to change the licensed URL.', 'wpcomplete' );
+			$this->errors[] = __( 'You must supply an iThemes membership username and password in order to change the licensed URL.', 'LION' );
 		} else if ( empty( $data['username'] ) ) {
-			$this->errors[] = __( 'You must supply an iThemes membership username in order to change the licensed URL.', 'wpcomplete' );
+			$this->errors[] = __( 'You must supply an iThemes membership username in order to change the licensed URL.', 'LION' );
 		} else if ( empty( $data['password'] ) ) {
-			$this->errors[] = __( 'You must supply an iThemes membership password in order to change the licensed URL.', 'wpcomplete' );
+			$this->errors[] = __( 'You must supply an iThemes membership password in order to change the licensed URL.', 'LION' );
 		} else if ( empty( $data['site_url'] ) ) {
-			$this->errors[] = __( 'The licensed URL cannot be blank.', 'wpcomplete' );
+			$this->errors[] = __( 'The licensed URL cannot be blank.', 'LION' );
 		} else if ( false === filter_var( $data['site_url'], FILTER_VALIDATE_URL ) ) {
-			$this->errors[] = __( 'The licensed URL must be a valid URL.', 'wpcomplete' );
+			$this->errors[] = __( 'The licensed URL must be a valid URL.', 'LION' );
 		} else if ( empty( $data['relicense_option'] ) || ! in_array( $data['relicense_option'], array( 'relicense', 'update' ) ) ) {
-			$this->errors[] = __( 'You must pick one of the License Option options.', 'wpcomplete' );
+			$this->errors[] = __( 'You must pick one of the License Option options.', 'LION' );
 		}
 
 		if ( ! empty( $this->errors ) ) {
@@ -849,7 +849,7 @@ class Ithemes_Updater_Settings_Page {
 			}
 
 			$GLOBALS['ithemes-updater-settings']->set_licensed_site_url( $data['site_url'] );
-			$this->messages[] = __( 'Successfully updated the Licensed URL.', 'wpcomplete' );
+			$this->messages[] = __( 'Successfully updated the Licensed URL.', 'LION' );
 		} else {
 			require_once( $GLOBALS['ithemes_updater_path'] . '/keys.php' );
 			$keys = Ithemes_Updater_Keys::get();
@@ -864,7 +864,7 @@ class Ithemes_Updater_Settings_Page {
 			}
 
 			$GLOBALS['ithemes-updater-settings']->set_licensed_site_url( $data['site_url'] );
-			$this->messages[] = __( 'Successfully updated the Licensed URL.', 'wpcomplete' );
+			$this->messages[] = __( 'Successfully updated the Licensed URL.', 'LION' );
 
 			$response = Ithemes_Updater_API::activate_package( $data['username'], $data['password'], $packages );
 
@@ -924,16 +924,16 @@ class Ithemes_Updater_Settings_Page {
 			$expiration = date( 'Y-m-d', $expiration_timestamp );
 		else {
 			if ( $time_left > 86400 )
-				$expiration = sprintf( _n( '%d day', '%d days', intval( $time_left / 86400 ), 'wpcomplete' ), intval( $time_left / 86400 ) );
+				$expiration = sprintf( _n( '%d day', '%d days', intval( $time_left / 86400 ), 'LION' ), intval( $time_left / 86400 ) );
 			else if ( $time_left > 3600 )
-				$expiration = sprintf( _n( '%d hour', '%d hours', intval( $time_left / 3600 ), 'wpcomplete' ), intval( $time_left / 3600 ) );
+				$expiration = sprintf( _n( '%d hour', '%d hours', intval( $time_left / 3600 ), 'LION' ), intval( $time_left / 3600 ) );
 			else if ( $time_left > 60 )
-				$expiration = sprintf( _n( '%d minute', '%d minutes', intval( $time_left / 60 ), 'wpcomplete' ), intval( $time_left / 60 ) );
+				$expiration = sprintf( _n( '%d minute', '%d minutes', intval( $time_left / 60 ), 'LION' ), intval( $time_left / 60 ) );
 			else
-				$expiration = sprintf( _n( '%d second', '%d seconds', $time_left, 'wpcomplete' ), intval( $time_left / 60 ) );
+				$expiration = sprintf( _n( '%d second', '%d seconds', $time_left, 'LION' ), intval( $time_left / 60 ) );
 
 			if ( $expired )
-				$expiration = sprintf( __( '%s ago', 'wpcomplete' ), $expiration );
+				$expiration = sprintf( __( '%s ago', 'LION' ), $expiration );
 		}
 
 		return $expiration;

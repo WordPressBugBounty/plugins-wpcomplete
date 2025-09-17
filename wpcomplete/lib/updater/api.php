@@ -58,7 +58,7 @@ class Ithemes_Updater_API {
 		}
 
 		if ( ! isset( $response['body'] ) ) {
-			return new WP_Error( 'ithemes-updater-changelog-bad-wp-remote-get-response', __( 'Unrecognized response from <code>wp_remote_get</code>.', 'wpcomplete' ) );
+			return new WP_Error( 'ithemes-updater-changelog-bad-wp-remote-get-response', __( 'Unrecognized response from <code>wp_remote_get</code>.', 'LION' ) );
 		}
 
 		if ( isset( $response['response']['code'] ) && ( '200' != $response['response']['code'] ) ) {
@@ -74,7 +74,7 @@ class Ithemes_Updater_API {
 			if ( is_array( $error ) && isset( $error['error'] ) && is_array( $error['error'] ) && isset( $error['error']['type'] ) && isset( $error['error']['message'] ) ) {
 				return new WP_Error( 'ithemes-updater-json-decode-error-' . $error['error']['type'], $error['error']['message'] );
 			} else {
-				return new WP_Error( 'ithemes-updater-changelog-bad-json-decode-result', __( 'Unrecognized response from iThemes API server.', 'wpcomplete' ) );
+				return new WP_Error( 'ithemes-updater-changelog-bad-json-decode-result', __( 'Unrecognized response from iThemes API server.', 'LION' ) );
 			}
 		}
 
@@ -322,28 +322,28 @@ class Ithemes_Updater_API {
 
 		switch( $code ) {
 			case 'ITXAPI_Updater_Bad_Login':
-				$message = __( 'Incorrect password. Please make sure that you are supplying your iThemes membership username and password details.', 'wpcomplete' );
+				$message = __( 'Incorrect password. Please make sure that you are supplying your iThemes membership username and password details.', 'LION' );
 				break;
 			case 'ITXAPI_Updater_Username_Unknown':
 			case 'ITXAPI_Updater_Username_Invalid':
-				$message = __( 'Invalid username. Please make sure that you are supplying your iThemes membership username and password details.', 'wpcomplete' );
+				$message = __( 'Invalid username. Please make sure that you are supplying your iThemes membership username and password details.', 'LION' );
 				break;
 			case 'ITXAPI_Product_Package_Unknown':
-				$message = sprintf( __( 'The licensing server reports that the %1$s (%2$s) product is unknown. Please contact support for assistance.', 'wpcomplete' ), $package_name, $package );
+				$message = sprintf( __( 'The licensing server reports that the %1$s (%2$s) product is unknown. Please contact support for assistance.', 'LION' ), $package_name, $package );
 				break;
 			case 'ITXAPI_Updater_Too_Many_Sites':
-				$message = sprintf( __( '%1$s could not be licensed since the membership account is out of available licenses for this product. You can unlicense the product on other sites or upgrade your membership to one with a higher number of licenses in order to increase the amount of available licenses.', 'wpcomplete' ), $package_name );
+				$message = sprintf( __( '%1$s could not be licensed since the membership account is out of available licenses for this product. You can unlicense the product on other sites or upgrade your membership to one with a higher number of licenses in order to increase the amount of available licenses.', 'LION' ), $package_name );
 				break;
 			case 'ITXAPI_License_Key_Generate_Failed':
-				$message = sprintf( __( '%s could not be licensed due to an internal error. Please try to license %s again at a later time. If this problem continues, please contact iThemes support.', 'wpcomplete' ), $package_name );
+				$message = sprintf( __( '%s could not be licensed due to an internal error. Please try to license %s again at a later time. If this problem continues, please contact iThemes support.', 'LION' ), $package_name );
 				break;
 		}
 
 		if ( empty( $message ) ) {
 			if ( ! empty( $package ) )
-				$message = sprintf( __( 'An unknown error relating to the %1$s product occurred. Please contact iThemes support. Error details: %2$s', 'wpcomplete' ), $package_name, $error->get_error_message() . " ($code)" );
+				$message = sprintf( __( 'An unknown error relating to the %1$s product occurred. Please contact iThemes support. Error details: %2$s', 'LION' ), $package_name, $error->get_error_message() . " ($code)" );
 			else
-				$message = sprintf( __( 'An unknown error occurred. Please contact iThemes support. Error details: %s', 'wpcomplete' ), $error->get_error_message() . " ($code)" );
+				$message = sprintf( __( 'An unknown error occurred. Please contact iThemes support. Error details: %s', 'LION' ), $error->get_error_message() . " ($code)" );
 		}
 
 		return $message;

@@ -174,20 +174,20 @@ class Ithemes_Updater_Admin {
 			$url = admin_url( 'options-general.php' ) . "?page={$this->page_name}";
 		}
 
-		echo '<div class="updated fade"><p>' . wp_sprintf( __( 'To receive automatic updates for %l, use the <a href="%s">iThemes Licensing</a> page found in the Settings menu.', 'wpcomplete' ), $names, $url ) . '</p></div>';
+		echo '<div class="updated fade"><p>' . wp_sprintf( __( 'To receive automatic updates for %l, use the <a href="%s">iThemes Licensing</a> page found in the Settings menu.', 'LION' ), $names, $url ) . '</p></div>';
 
 
 		$GLOBALS['ithemes-updater-settings']->update_packages();
 	}
 
 	public function add_admin_pages() {
-		$this->page_ref = add_options_page( __( 'iThemes Licensing', 'wpcomplete' ), __( 'iThemes Licensing', 'wpcomplete' ), 'manage_options', $this->page_name, array( $this, 'settings_index' ) );
+		$this->page_ref = add_options_page( __( 'iThemes Licensing', 'LION' ), __( 'iThemes Licensing', 'LION' ), 'manage_options', $this->page_name, array( $this, 'settings_index' ) );
 
 		add_action( "load-{$this->page_ref}", array( $this, 'load_settings_page' ) );
 	}
 
 	public function add_network_admin_pages() {
-		$this->page_ref = add_submenu_page( 'settings.php', __( 'iThemes Licensing', 'wpcomplete' ), __( 'iThemes Licensing', 'wpcomplete' ), 'manage_options', $this->page_name, array( $this, 'settings_index' ) );
+		$this->page_ref = add_submenu_page( 'settings.php', __( 'iThemes Licensing', 'LION' ), __( 'iThemes Licensing', 'LION' ), 'manage_options', $this->page_name, array( $this, 'settings_index' ) );
 
 		add_action( "load-{$this->page_ref}", array( $this, 'load_settings_page' ) );
 	}
@@ -215,7 +215,7 @@ class Ithemes_Updater_Admin {
 		}
 
 		$url = admin_url( 'options-general.php' ) . "?page={$this->page_name}";
-		$this->registration_link = sprintf( '<a href="%1$s" title="%2$s">%3$s</a>', $url, __( 'Manage iThemes product licenses to receive automatic upgrade support', 'wpcomplete' ), __( 'License', 'wpcomplete' ) );
+		$this->registration_link = sprintf( '<a href="%1$s" title="%2$s">%3$s</a>', $url, __( 'Manage iThemes product licenses to receive automatic upgrade support', 'LION' ), __( 'License', 'LION' ) );
 	}
 
 	public function filter_plugin_action_links( $actions, $plugin_file, $plugin_data, $context ) {

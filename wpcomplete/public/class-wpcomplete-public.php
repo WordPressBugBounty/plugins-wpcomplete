@@ -188,9 +188,9 @@ class WPComplete_Public extends WPComplete_Common {
     $post_id = get_the_ID();
     $button_id = '';
     if ( isset( $atts['id'] ) && !empty( $atts['id'] ) ) {
-      $button_id = $atts['id'];
+      $button_id = sanitize_text_field($atts['id']);
     } else if ( isset( $atts['name'] ) && !empty( $atts['name'] ) ) {
-      $button_id = $atts['name'];
+      $button_id = sanitize_text_field($atts['name']);
     }
     if ( isset( $atts['post_id'] ) && !empty( $atts['post_id'] ) ) {
       $post_id = intval($atts['post_id']);
@@ -1227,12 +1227,12 @@ li .wpc-lesson-completed:after { content: "✔"; margin-left: 5px; }
       if ( is_numeric($atts['id']) ) {
         $post_id = $atts['id'];
       } else {
-        $button_id = $atts['id'];
+        $button_id = sanitize_text_field($atts['id']);
       }
     } else if ( isset( $atts['name'] ) && !empty( $atts['name'] ) ) {
-      $button_id = $atts['name'];
+      $button_id = sanitize_text_field($atts['name']);
     } else if ( isset( $atts['button'] ) && !empty( $atts['button'] ) ) {
-      $button_id = $atts['button'];
+      $button_id = sanitize_text_field($atts['button']);
     }
     if ( isset( $atts['post'] ) && !empty( $atts['post'] ) ) {
       $post_id = $atts['post'];
@@ -1377,10 +1377,10 @@ li .wpc-lesson-completed:after { content: "✔"; margin-left: 5px; }
       if ( is_numeric($atts['id']) ) {
         $post_id = $atts['id'];
       } else {
-        $button_id = $atts['id'];
+        $button_id = sanitize_text_field($atts['id']);
       }
     } else if ( isset( $atts['name'] ) && !empty( $atts['name'] ) ) {
-      $button_id = $atts['name'];
+      $button_id = sanitize_text_field($atts['name']);
     }
     if ( isset( $atts['post'] ) && !empty( $atts['post'] ) ) {
       $post_id = $atts['post'];

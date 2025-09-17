@@ -39,6 +39,11 @@ $active_tab = isset( $_GET['tab'] ) ? sanitize_text_field( wp_unslash( $_GET['ta
 
 <div class="content">
 	<form action="options.php" method="post">
+		<?php
+		settings_fields( $this->plugin_name . '_' . $active_tab );
+		do_settings_sections( $this->plugin_name . '_' . $active_tab );
+		submit_button();
+		?>
 	</form>
 </div>
 
