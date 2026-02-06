@@ -8,7 +8,7 @@
  * @wordpress-plugin
  * Plugin Name:       WPComplete (FREE)
  * Description:       A WordPress plugin that helps your students keep track of their progress through your course or membership site.
- * Version:           2.9.5.3
+ * Version:           2.9.5.4
  * Author:            iThemes
  * Author URI:        https://ithemes.com/
  * License:           GPL-2.0+
@@ -32,7 +32,7 @@ if ( ! defined( 'JSON_UNESCAPED_UNICODE' ) ) {
 define( 'WPCOMPLETE_STORE_URL', 'https://wpcomplete.co' );
 define( 'WPCOMPLETE_PRODUCT_NAME', 'WPComplete' );
 define( 'WPCOMPLETE_PREFIX', 'wpcomplete' );
-define( 'WPCOMPLETE_VERSION', '2.9.5.3' );
+define( 'WPCOMPLETE_VERSION', '2.9.5.4' );
 define( 'WPCOMPLETE_IS_ACTIVATED', false );
 
 function wpcomplete_is_production() {

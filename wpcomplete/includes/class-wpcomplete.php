@@ -190,7 +190,6 @@ class WPComplete {
 
 			// auto complete/suggest page/post title lookup
 			$this->loader->add_action( 'wp_ajax_wpc_post_lookup', $plugin_admin, 'post_lookup');
-			$this->loader->add_action( 'wp_ajax_nopriv_wpc_post_lookup', $plugin_admin, 'post_lookup');
 
 			// report exporting...
 			$this->loader->add_action( 'admin_init', $plugin_admin, 'export_button_completion_csv');
@@ -199,10 +198,8 @@ class WPComplete {
 		}
 		// allow admins to delete buttons:
 		$this->loader->add_action( 'wp_ajax_wpc_delete_button', $plugin_admin, 'delete_button' );
-		$this->loader->add_action( 'wp_ajax_nopriv_wpc_delete_button', $plugin_admin, 'delete_button' );
 		// allow admins to reset users' button data:
 		$this->loader->add_action( 'wp_ajax_wpc_reset_button', $plugin_admin, 'reset_button' );
-		$this->loader->add_action( 'wp_ajax_nopriv_wpc_reset_button', $plugin_admin, 'reset_button' );
 
 		// FIX OTHER PLUGINS:
 		$this->loader->add_filter( 'manage_knowledgebase_posts_columns', $plugin_admin, 'add_custom_column_header' );

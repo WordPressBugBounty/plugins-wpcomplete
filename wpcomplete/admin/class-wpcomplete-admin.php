@@ -77,11 +77,11 @@ class WPComplete_Admin extends WPComplete_Common {
 
       wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/wpcomplete-admin.js', $deps, $this->version, true );
 
-      //$completion_nonce = wp_create_nonce( 'completable_nonce' );
+      $admin_nonce = wp_create_nonce( 'wpc_admin_nonce' );
 
       $params = array(
-        'url' => admin_url( 'admin-ajax.php' ),
-        //'nonce' => $completion_nonce
+        'url'   => admin_url( 'admin-ajax.php' ),
+        'nonce' => $admin_nonce,
       );
 
       wp_localize_script( $this->plugin_name, WPCOMPLETE_PRODUCT_NAME, $params );
@@ -2159,13 +2159,21 @@ li .wpc-lesson {} li .wpc-lesson-complete {} li .wpc-lesson-completed { opacity:
   /**
    * Delete button stored in database.
    *
-   * @since  2.2.6
-   * @last   2.8.9
+   * @since 2.2.6
    */
   public function delete_button() {
+    // Verify nonce.
+    check_ajax_referer( 'wpc_admin_nonce', 'nonce' );
+
     // delete the button...
     // add flash message?
-    $post_id = $_REQUEST['post_id'];
+    $post_id = (int) sanitize_text_field( wp_unslash( $_REQUEST['post_id'] ?? '' ) );
+
+    // Verify user capabilities.
+    if ( ! current_user_can( 'edit_posts', $post_id ) ) {
+      wp_send_json_error( 'Unauthorized', 403 );
+      exit;
+    }
 
     $post_meta_json = get_post_meta( $post_id, 'wpcomplete', true );
     $post_meta = json_decode( stripslashes( $post_meta_json ), JSON_UNESCAPED_UNICODE );
@@ -2174,7 +2182,7 @@ li .wpc-lesson {} li .wpc-lesson-complete {} li .wpc-lesson-completed { opacity:
     if ( isset( $_REQUEST['button'] ) ) {
       $buttons = $post_meta['buttons'];
       // delete specific button
-      $key = array_search($_REQUEST['button'], $buttons);
+      $key = array_search( sanitize_text_field( wp_unslash( $_REQUEST['button'] ?? '' ) ), $buttons );
       unset($buttons[$key]);
     } else {
       $buttons = array();
@@ -2195,11 +2203,19 @@ li .wpc-lesson {} li .wpc-lesson-complete {} li .wpc-lesson-completed { opacity:
   /**
    * Delete button data for all users stored in database.
    *
-   * @since  2.7.0
-   * @last   2.7.0
+   * @since 2.7.0
    */
   public function reset_button() {
-    $button = $_REQUEST['button'];
+    // Verify nonce.
+    check_ajax_referer( 'wpc_admin_nonce', 'nonce' );
+
+    // Verify user capabilities.
+    if ( ! current_user_can( 'manage_options' ) ) {
+      wp_send_json_error( 'Unauthorized', 403 );
+      exit;
+    }
+
+    $button = sanitize_text_field( wp_unslash( $_REQUEST['button'] ?? '' ) );
     // loop through each user
     $selected_role = get_option( $this->plugin_name . '_role', 'subscriber' );
     // Get all users that are able to complete the post:
@@ -2347,6 +2363,9 @@ li .wpc-lesson {} li .wpc-lesson-complete {} li .wpc-lesson-completed { opacity:
    * @last 2.4.2
    */
   public function post_lookup() {
+    // Verify nonce.
+    check_ajax_referer( 'wpc_admin_nonce', 'nonce' );
+
     $current_post_id = (int) $_GET['post_id'];
     $term = strtolower( $_GET['term'] );
     $suggestions = array();

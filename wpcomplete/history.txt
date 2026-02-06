@@ -19,3 +19,5 @@
 	Bug Fix: Restored missing settings fields.
 2.9.5.3 - 2025-09-17 - StellarWP
 	* Security Fix: Tightened security around `wpc_button` shortcode.
+2.9.5.4 - 2025-10-09 - StellarWP
+	* Security Fix: Tightened security around actions.

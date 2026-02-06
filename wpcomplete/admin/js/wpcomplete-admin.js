@@ -15,7 +15,7 @@
         response( cache[ term ] );
         return;
       }
-      $.getJSON( WPComplete.url + "?action=wpc_post_lookup&post_id=" + post_id, request, function( data, status, xhr ) {
+      $.getJSON( WPComplete.url + "?action=wpc_post_lookup&post_id=" + post_id + "&nonce=" + WPComplete.nonce, request, function( data, status, xhr ) {
         cache[ term ] = data;
         response( data );
       });
@@ -76,12 +76,12 @@
       var post_id = $(this).data('post-id');
       var button = $(this).data('button');
 
-      $.getJSON( WPComplete.url + "?action=wpc_delete_button", { post_id: post_id, button: button }, function( data, status, xhr ) {
+      $.getJSON( WPComplete.url + "?action=wpc_delete_button", { post_id: post_id, button: button, nonce: WPComplete.nonce }, function( data, status, xhr ) {
         console.log(data);
         $(elm).parent().fadeOut(1000);
       });
     }
-    
+
     return false;
   });
 
@@ -92,14 +92,14 @@
       var elm = this;
       var post_id = $(this).data('post-id');
 
-      $.getJSON( WPComplete.url + "?action=wpc_delete_button", { post_id: post_id }, function( data, status, xhr ) {
+      $.getJSON( WPComplete.url + "?action=wpc_delete_button", { post_id: post_id, nonce: WPComplete.nonce }, function( data, status, xhr ) {
         console.log("wpc_delete_all: " + data);
         $('.wpc-buttons-container').fadeOut(1000, function() {
           $('.wpc-buttons-container').html("Your post's buttons have been removed. Once you save your post, any buttons from shortcodes will be re-registered.").fadeIn(1000);
         });
       });
     }
-    
+
     return false;
   });
 
@@ -110,14 +110,14 @@
       var elm = this;
       var button = $(this).data('button-id');
 
-      $.getJSON( WPComplete.url + "?action=wpc_reset_button", { button: button }, function( data, status, xhr ) {
+      $.getJSON( WPComplete.url + "?action=wpc_reset_button", { button: button, nonce: WPComplete.nonce }, function( data, status, xhr ) {
         console.log("wpc_reset_button: " + data);
         //$(elm).parent().fadeOut(1000);
         // display a message or swap out table record with new data?
         window.location = window.location.href;
       });
     }
-    
+
     return false;
   });
 
