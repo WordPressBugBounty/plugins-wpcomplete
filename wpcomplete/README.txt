@@ -2,10 +2,10 @@
 Author URI: https://wpcomplete.co
 Author: StellarWP
 Contributors: stellarwp
-Tags: courses, teaching, read, mark, complete, lms, membership, pages, page, posts, post, widget, plugin, admin, shortcode, progress, progress bar, completion, tracking, dashboard, groups, learning
+Tags: courses lms, teaching, learning, membership, progress bar
 Requires at least: 4.5.3
 Tested up to: 6.8.3
-Stable tag: 2.9.5.4
+Stable tag: 2.9.5.5
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 A WordPress plugin that helps your students keep track of their progress through your course.
@@ -15,7 +15,7 @@ A WordPress plugin that helps your students keep track of their progress through
 
 [WPComplete has joined the iThemes family!](https://ithemes.com/wpcomplete-joining-ithemes-family)
 
-WPComplete is a WordPress plugin that helps your students keep track of their progress through your course or membership site.
+WPComplete is a WordPress plugin that helps your students keep track of their progress through your course or membership site. 
 
 All you have to do is pick which pages or posts can be marked as “Completed”.
 
@@ -68,14 +68,14 @@ If you like WPComplete, please [leave us a ★★★★★ rating](https://wordp
 
 Make sure you are reporting in a safe and responsible way. We take security very seriously. If you discover a security issue, please bring it to our attention right away! Below you will find all the methods to report security vulnerabilities:
 
-* [Report security bugs through the Patchstack Vulnerability Disclosure Program](https://patchstack.com/database/vdp/9e5fb978-d0a2-4063-b106-84b89f77b4b9)
+* [Report security bugs through the Patchstack Vulnerability Disclosure Program](https://patchstack.com/database/vdp/wpcomplete)
 * Check our [Bug Bounty Program](https://www.liquidweb.com/policies/bug-bounty-program/)
 * Reach out directly to us on `security [at] stellarwp.com`.
 
 = How do I enable a page so that it is completable? =
-To enable a page so that it's completable:
-1. Find the page from your WordPress admin page directory and click in to edit.
-2. Scroll to the WPComplete meta box.
+To enable a page so that it's completable: 
+1. Find the page from your WordPress admin page directory and click in to edit. 
+2. Scroll to the WPComplete meta box. 
 3. Check the "Enable Complete button" checkbox.
 4. (Optional) Place the `[wpc_complete_button]` shortcode in the content of your post, where you want the button to exist.
 5. Update or Publish the page to save the changes.
@@ -90,7 +90,7 @@ There are two options to add custom branding/style your WPComplete buttons:
 It could be one of a couple reasons:
 1. You're not logged in to your wordpress site. Only logged in users can see the button.
 2. That page doesn't have buttons enabled. Make sure the `Enable Complete button` checkbox is checked in the WPComplete metabox when editting that page.
-3. You don't have `Automatically add complete button to enabled posts & pages for me.` checked and you haven't added the `[wpc_complete_button]` shortcode to your page content.
+3. You don't have `Automatically add complete button to enabled posts & pages for me.` checked and you haven't added the `[wpc_complete_button]` shortcode to your page content. 
 Still not showing up? Let us know and we can help figure out what's going on.
 
 = How do I see how many students have completed each lesson? =
@@ -141,17 +141,17 @@ Yes! In the pro version, we append the css class .wpc-lesson to ALL links to pos
 
 = I use OptimizePress. Can I use WPComplete? =
 Yes! OptimizePress is a little tricky to get working, but it does work! We automatically disable automatic insertion of the completion button, but you can easily add it where you want the button to show up!
-To add the button to your page:
-1. Edit the page you want to add completion to.
-2. You should already be on the OptimizePress tab (not the WordPress tab).
-3. Click the Live Editor "Launch Now" button.
-4. Click the "Add Element" button where you want to add your completion button.
-5. Select a "Custom HTML / Shortcode" element.
-6. In the "Content" field, insert the shortcode: [complete_button]
-7. Scroll down and click the "Insert" button.
+To add the button to your page: 
+1. Edit the page you want to add completion to. 
+2. You should already be on the OptimizePress tab (not the WordPress tab). 
+3. Click the Live Editor "Launch Now" button. 
+4. Click the "Add Element" button where you want to add your completion button. 
+5. Select a "Custom HTML / Shortcode" element. 
+6. In the "Content" field, insert the shortcode: [complete_button] 
+7. Scroll down and click the "Insert" button. 
 8. The new preview will say something like:
 `
-!!! CUSTOM HTML CODE ELEMENT !!!
+!!! CUSTOM HTML CODE ELEMENT !!! 
 [wpc_button]
 `
 9. Click the Save & Close (or Save & Continue) button
@@ -169,6 +169,10 @@ To add the button to your page:
 
 
 == Changelog ==
+
+= 2.9.5.5 =
+
+* Security Fix: Tightened security when producing custom buttons.
 
 = 2.9.5.4 =
 
@@ -193,7 +197,7 @@ To add the button to your page:
 = 2.9.4 =
 * Bug Fix: Version Bump
 
-= 2.9.3 =
+= 2.9.3 = 
 * Improvement: Removing old license key field
 * Improvement: Redirecting support link
 * Bug Fix: Adding missing files
@@ -201,7 +205,7 @@ To add the button to your page:
 = 2.9.2 =
 * Bug Fix: Corrected fetching buttons for posts without a specific course name.
 
-= 2.9.1 =
+= 2.9.1 = 
 * Improvement: Removing old license key field
 * Improvement: Redirecting support link
 * Bug Fix: Adding missing files
@@ -213,14 +217,14 @@ To add the button to your page:
 * Cleaned up and simplified code.
 * Javascript completion triggers.
 
-= 2.5 =
+= 2.5 = 
 * Optimizations and various fixes.
 * Fix encoding issues on buttons.
 * Ability to hide the completion column on the users table.
 * New shortcodes! [wpc_next_to_complete], [wpc_last_completed], and [wpc_next_page] / [wpc_previous_page] -- be sure to check the documentation for more details.
 * New Wordpress filters allow you to execute WP/PHP code on button, page and course completion.
 
-= 2.4 =
+= 2.4 = 
 * Various bug fixes, including unlimited and lifetime license verification.
 * New shortcode to insert a [wpc_reset] shortcode that users can use to clear their completion data.
 * Ability to easily edit course names from your WordPress admin.
@@ -245,7 +249,7 @@ To add the button to your page:
 * Simple nav builder: easily list completable pages with just a shortcode (#1 requested feature).
 * Custom jQuery event triggers: when a button, page or course is completed, use our new custom jQuery events to trigger your own javascript code.
 
-= 2.1 =
+= 2.1 = 
 * Change the text of each individual button via shortcode attributes.
 * Completed/Incomplete content blocks for entire page and entire course.
 * Added setting to disable dashboard widget.
@@ -257,7 +261,7 @@ To add the button to your page:
 
 = 1.4 =
 * PRO FEATURE ONLY: Support for multiple courses within a single WordPress site.
-* PRO FEATURE ONLY: Basic post page displaying all available students and their current status.
+* PRO FEATURE ONLY: Basic post page displaying all available students and their current status. 
 * PRO FEATURE ONLY: Basic user page displaying all available posts a user can complete and their current status.
 
 = 1.3 =
@@ -282,7 +286,7 @@ To add the button to your page:
 
 
 == Upgrade Notice ==
-= 2.3 =
+= 2.3 = 
 Tons of optimization and fixes, along with new features and improvements for PRO accounts!
 
 = 1.4 =
@@ -299,3 +303,4 @@ Adds support for custom content types. Also fixed a couple non-critical bugs.
 
 = 1.0 =
 First release. No need to upgrade yet.
+

@@ -1384,8 +1384,9 @@ li .wpc-lesson {} li .wpc-lesson-complete {} li .wpc-lesson-completed { opacity:
                 }
 
                 list($button_post_id, $button_id) = $this->extract_button_info($button);
-                $button_name = ($button === ''.$post_id) ? 'Default Button' : "Button '$button_id'";
-                $completion .= ('<a href="edit.php?page=wpcomplete-buttons&post_id=' . $post_id . '&button=' . $button . '">' . "$button_name: $completed_users/$avail_users Users (" . round(100 * ($completed_users / $avail_users), 1) . '%)</a><br>');
+                $button_name = ($button === ''.$post_id) ? 'Default Button' : "Button '" . esc_html( $button_id ) . "'";
+                $href = esc_url( admin_url( 'edit.php?page=wpcomplete-buttons&post_id=' . absint( $post_id ) . '&button=' . rawurlencode( $button ) ) );
+                $completion .= '<a href="' . $href . '">' . esc_html( "$button_name: $completed_users/$avail_users Users (" . round(100 * ($completed_users / $avail_users), 1) . '%' ) . '</a><br>';
               }
             } else {
               // calculate how many of these users are completed...
@@ -1400,14 +1401,14 @@ li .wpc-lesson {} li .wpc-lesson-complete {} li .wpc-lesson-completed { opacity:
                 }
               }
 
-              $completion = '<a href="edit.php?page=wpcomplete-posts&post_id=' . $post_id . '">' . ("$completed_users/$avail_users Users (" . round(100 * ($completed_users / $avail_users), 1) . '%)')  . '</a>';
+              $completion = '<a href="' . esc_url( admin_url( 'edit.php?page=wpcomplete-posts&post_id=' . absint( $post_id ) ) ) . '">' . esc_html( "$completed_users/$avail_users Users (" . round(100 * ($completed_users / $avail_users), 1) . '%' ) . '</a>';
             }
           } else {
             $completion = "0 Users";
           }
-          echo '<div id="completable-' . $post_id . '">' . $completion . '</div>';
+          echo '<div id="completable-' . absint( $post_id ) . '">' . $completion . '</div>';
         } else {
-          echo '<div id="completable-' . $post_id . '">—</div>';
+          echo '<div id="completable-' . absint( $post_id ) . '">—</div>';
         }
       }
     }

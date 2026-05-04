@@ -21,3 +21,5 @@
 	* Security Fix: Tightened security around `wpc_button` shortcode.
 2.9.5.4 - 2025-10-09 - StellarWP
 	* Security Fix: Tightened security around actions.
+2.9.5.5 - 2026-05-04 - StellarWP
+	* Security Fix: Tightened security when producing custom buttons.

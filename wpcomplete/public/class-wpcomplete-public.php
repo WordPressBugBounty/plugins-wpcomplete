@@ -782,14 +782,28 @@ li .wpc-lesson-completed:after { content: "✔"; margin-left: 5px; }
     
     // Get any existing lessons this user has completed:
     $user_completed = $this->get_user_activity();
-    
-    $unique_button_id = $_REQUEST['button'];
-    list($post_id, $button_id) = $this->extract_button_info($unique_button_id);
+
+    $raw = wp_unslash( $_REQUEST['button'] ?? '' );
+    if ( ! preg_match( '/^(\d+)(?:-([a-zA-Z0-9_\-]+))?$/', $raw, $m ) ) {
+      wp_send_json_error( 'Invalid button', 400 );
+    }
+    $post_id          = (int) $m[1];
+    $button_id        = $m[2] ?? '';
+    $unique_button_id = empty( $button_id ) ? (string) $post_id : $post_id . '-' . $button_id;
 
     $course = $this->post_course($post_id);
 
     $posts = $this->get_completable_posts();
-    if ( isset( $button_id ) && ( !isset( $posts[$post_id]['buttons'] ) || !in_array( $unique_button_id, $posts[$post_id]['buttons'] ) ) ) {
+
+    // Prevent any authenticated user from marking an arbitrary post as completed.
+    // Without this check the user-meta write below is unconditional, so a subscriber
+    // could supply any post ID and trigger completion-gated content, webhooks, or
+    // certificate generation for posts they were never enrolled in.
+    if ( ! isset( $posts[ $post_id ] ) ) {
+      wp_send_json_error( 'Invalid button', 403 );
+    }
+
+    if ( ! empty( $button_id ) && ( !isset( $posts[$post_id]['buttons'] ) || !in_array( $unique_button_id, $posts[$post_id]['buttons'] ) ) ) {
       $post_meta = $posts[$post_id];
       if ( !isset( $post_meta['buttons'] ) ) $post_meta['buttons'] = array();
       $post_meta['buttons'][] = $unique_button_id;
@@ -1034,8 +1048,13 @@ li .wpc-lesson-completed:after { content: "✔"; margin-left: 5px; }
     $user_completed = $this->get_user_activity();
 
     // Get any existing lessons this user has completed:
-    $unique_button_id = $_REQUEST['button'];
-    list($post_id, $button_id) = $this->extract_button_info($unique_button_id);
+    $raw = wp_unslash( $_REQUEST['button'] ?? '' );
+    if ( ! preg_match( '/^(\d+)(?:-([a-zA-Z0-9_\-]+))?$/', $raw, $m ) ) {
+      wp_send_json_error( 'Invalid button', 400 );
+    }
+    $post_id          = (int) $m[1];
+    $button_id        = $m[2] ?? '';
+    $unique_button_id = empty( $button_id ) ? (string) $post_id : $post_id . '-' . $button_id;
 
     $course = $this->post_course($post_id);
     $previous_post_status = $this->post_completion_status($post_id);
