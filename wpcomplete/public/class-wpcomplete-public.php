@@ -243,6 +243,27 @@ class WPComplete_Public extends WPComplete_Common {
       $this->set_user_activity($user_activity);
     }
 
+    // Register named buttons only on a genuine front-end render, where the id is
+    // derived from author-defined shortcode attributes. AJAX callbacks
+    // (get_button, mark_completed, mark_uncompleted) also reach this method to
+    // re-render button HTML from a client-supplied id, so registration must never
+    // happen during AJAX: otherwise any authenticated user could inject arbitrary
+    // buttons here - the very write the completion endpoint now refuses - and
+    // distort everyone's progress or grow the meta without bound (DoS).
+    if ( ! empty( $button_id ) && ! ( defined( 'DOING_AJAX' ) && DOING_AJAX ) ) {
+      $posts = $this->get_completable_posts();
+      if ( isset( $posts[ $post_id ] ) && ( !isset( $posts[$post_id]['buttons'] ) || !in_array( $unique_button_id, $posts[$post_id]['buttons'], true ) ) ) {
+        $post_meta = $posts[$post_id];
+        if ( !isset( $post_meta['buttons'] ) ) $post_meta['buttons'] = array();
+        $post_meta['buttons'][] = $unique_button_id;
+        update_post_meta( $post_id, 'wpcomplete', json_encode( $post_meta, JSON_UNESCAPED_UNICODE ) );
+        // Invalidate the cached completable-posts sets so the new button is
+        // visible to the completion endpoint on the next request.
+        wp_cache_delete( 'posts-true', 'wpcomplete' );
+        wp_cache_delete( 'posts-false', 'wpcomplete' );
+      }
+    }
+
     // NOTE: if you have graphs that were loaded before this, they will be out of date...
     // We should recommend that if someone uses autocomplete, they should also use async.
     if ( isset( $atts['autocomplete'] ) && !isset( $user_activity[$unique_button_id]['completed'] ) ) {
@@ -784,7 +805,7 @@ li .wpc-lesson-completed:after { content: "✔"; margin-left: 5px; }
     $user_completed = $this->get_user_activity();
 
     $raw = wp_unslash( $_REQUEST['button'] ?? '' );
-    if ( ! preg_match( '/^(\d+)(?:-([a-zA-Z0-9_\-]+))?$/', $raw, $m ) ) {
+    if ( ! preg_match( '/^(\d+)(?:-([a-zA-Z0-9_\-]{1,64}))?$/', $raw, $m ) ) {
       wp_send_json_error( 'Invalid button', 400 );
     }
     $post_id          = (int) $m[1];
@@ -803,14 +824,18 @@ li .wpc-lesson-completed:after { content: "✔"; margin-left: 5px; }
       wp_send_json_error( 'Invalid button', 403 );
     }
 
-    if ( ! empty( $button_id ) && ( !isset( $posts[$post_id]['buttons'] ) || !in_array( $unique_button_id, $posts[$post_id]['buttons'] ) ) ) {
-      $post_meta = $posts[$post_id];
-      if ( !isset( $post_meta['buttons'] ) ) $post_meta['buttons'] = array();
-      $post_meta['buttons'][] = $unique_button_id;
-      $posts[ $post_id ] = $post_meta;
-      // Save changes:
-      update_post_meta( $post_id, 'wpcomplete', json_encode( $post_meta, JSON_UNESCAPED_UNICODE ) );
-      wp_cache_set( "posts", json_encode( $posts, JSON_UNESCAPED_UNICODE ), 'wpcomplete' );
+    // A named button must already be registered for this post. Registration only
+    // happens on trusted paths (admin save, or server-side render in
+    // complete_button_cb where the id comes from author-defined shortcode attrs).
+    // Never let a client-supplied button id expand the post's global wpcomplete
+    // config here: doing so let any logged-in user inflate the button count,
+    // skewing everyone's completion percentage, and grow the meta array without
+    // bound, exhausting memory when it is parsed on frontend loads (DoS).
+    if ( ! empty( $button_id ) ) {
+      $registered = isset( $posts[ $post_id ]['buttons'] ) ? (array) $posts[ $post_id ]['buttons'] : array();
+      if ( ! in_array( $unique_button_id, $registered, true ) ) {
+        wp_send_json_error( 'Invalid button', 403 );
+      }
     }
 
     // Mark this button as completed:
@@ -1049,7 +1074,7 @@ li .wpc-lesson-completed:after { content: "✔"; margin-left: 5px; }
 
     // Get any existing lessons this user has completed:
     $raw = wp_unslash( $_REQUEST['button'] ?? '' );
-    if ( ! preg_match( '/^(\d+)(?:-([a-zA-Z0-9_\-]+))?$/', $raw, $m ) ) {
+    if ( ! preg_match( '/^(\d+)(?:-([a-zA-Z0-9_\-]{1,64}))?$/', $raw, $m ) ) {
       wp_send_json_error( 'Invalid button', 400 );
     }
     $post_id          = (int) $m[1];

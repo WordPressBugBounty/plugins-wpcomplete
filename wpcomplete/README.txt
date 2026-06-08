@@ -5,7 +5,7 @@ Contributors: stellarwp
 Tags: courses lms, teaching, learning, membership, progress bar
 Requires at least: 4.5.3
 Tested up to: 6.8.3
-Stable tag: 2.9.5.5
+Stable tag: 2.9.5.6
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 A WordPress plugin that helps your students keep track of their progress through your course.
@@ -169,6 +169,10 @@ To add the button to your page:
 
 
 == Changelog ==
+
+= 2.9.5.6 =
+
+* Security Fix: Tightened security around completion button handling.
 
 = 2.9.5.5 =
 
