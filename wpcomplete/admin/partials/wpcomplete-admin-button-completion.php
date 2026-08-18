@@ -3,12 +3,12 @@
 
   <div style="float: right">
 
-    <a href="<?php echo $_SERVER['REQUEST_URI']; ?>&amp;export" class="button button-primary">Export to CSV</a>
+    <a href="<?php echo esc_url( add_query_arg( 'export', '' ) ); ?>" class="button button-primary">Export to CSV</a>
 
   </div>
 
-  <h1>Completion: <?php echo (empty($button)) ? 'Default Button' : "Button '$button'"; ?></h1>
-  <h3>Post: <?php echo $post->post_title; ?></h3>
+  <h1>Completion: <?php echo (empty($button)) ? 'Default Button' : "Button '" . esc_html( $button ) . "'"; ?></h1>
+  <h3>Post: <?php echo esc_html( $post->post_title ); ?></h3>
 
   <div class="tablenav top">
     <div class="tablenav-pages one-page">

@@ -65,7 +65,7 @@
           list($post_id, $button_id) = $this->extract_button_info($button); 
       ?>
       <li>
-        <?php echo (empty($button_id)) ? 'Default' : $button_id; ?> - <a href="#" class="wpc_delete_button" data-post-id="<?php echo $post_id; ?>" data-button="<?php echo $button; ?>">(delete)</a>
+        <?php echo (empty($button_id)) ? 'Default' : esc_html( $button_id ); ?> - <a href="#" class="wpc_delete_button" data-post-id="<?php echo esc_attr( $post_id ); ?>" data-button="<?php echo esc_attr( $button ); ?>">(delete)</a>
       </li>
       <?php endforeach; ?>
       </ul>

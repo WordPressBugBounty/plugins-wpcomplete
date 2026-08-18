@@ -1761,7 +1761,7 @@ li .wpc-lesson {} li .wpc-lesson-complete {} li .wpc-lesson-completed { opacity:
     }
 
     // Get post info:
-    $button_id = $_GET['button'];
+    $button_id = sanitize_text_field( $_GET['button'] );
     list($post_id, $button) = $this->extract_button_info($button_id);
     $post_id = absint($_GET['post_id']);
     $post = get_post($post_id);
@@ -2465,10 +2465,15 @@ li .wpc-lesson {} li .wpc-lesson-complete {} li .wpc-lesson-completed { opacity:
       wp_die( __( 'You only get access to this data once you activate your license.' ) );
     }
 
-    $user_id = $_REQUEST['user_id'];
+    $user_id = (int) $_REQUEST['user_id'];
+
+    if ( ! wp_verify_nonce( $_REQUEST['_wpnonce'], 'user_completion-' . $user_id ) ) {
+      wp_die( __( 'Are you sure you have permission to do this? No nonce present.' ) );
+    }
+
     $user_completed = $this->get_user_activity($user_id);
 
-    $unique_button_id = $_REQUEST['button'];
+    $unique_button_id = sanitize_text_field( $_REQUEST['button'] );
     list($post_id, $button_id) = $this->extract_button_info($unique_button_id);
 
     $course = $this->post_course($post_id);

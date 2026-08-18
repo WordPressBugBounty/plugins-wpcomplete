@@ -46,7 +46,7 @@
       <?php foreach ($values['buttons'] as $button => $info) : ?>
       <tr id='post-<?php echo $post_id; ?>'>
         <td class='name column-title' data-colname="Title">
-          <a href="<?php echo $info['link']; ?>"><?php echo $button ?></a>
+          <a href="<?php echo esc_url( $info['link'] ); ?>"><?php echo esc_html( $button ); ?></a>
         </td>
         <td class='completable column-started' data-colname="Started">
           <div id="completable-<?php echo $user->ID; ?>-started">
@@ -72,12 +72,12 @@
         </td>
         <td class='completable column-utilities' data-colname="Utilities">
           <?php if ( $info['completed'] === 'No' ) : ?>
-          <form method="post" action="<?php echo admin_url("admin-post.php?action=user_completion&amp;user_id=" . $user->ID . "&amp;button=" . $info['button'] . "&amp;complete=true"); ?>" style="display: inline;">
-            <a href="#" onclick="if (confirm('Are you sure you want to mark \'<?php echo $button; ?>\' completed for this user?')) { this.parentNode.submit(); } return false;">Mark Completed</a>
+          <form method="post" action="<?php echo esc_url( wp_nonce_url( admin_url( "admin-post.php?action=user_completion&amp;user_id=" . $user->ID . "&amp;button=" . rawurlencode( $info['button'] ) . "&amp;complete=true" ), 'user_completion-' . $user->ID ) ); ?>" style="display: inline;">
+            <a href="#" onclick="if (confirm('Are you sure you want to mark \'<?php echo esc_js( $button ); ?>\' completed for this user?')) { this.parentNode.submit(); } return false;">Mark Completed</a>
           </form>
           <?php else : ?>
-          <form method="post" action="<?php echo admin_url("admin-post.php?action=user_completion&amp;user_id=" . $user->ID . "&amp;button=" . $info['button'] . "&amp;complete=false"); ?>" style="display: inline;">
-            <a href="#" onclick="if (confirm('Are you sure you want to mark \'<?php echo $button; ?>\' as incomplete for this user?')) { this.parentNode.submit(); } return false;">Mark Incomplete</a>
+          <form method="post" action="<?php echo esc_url( wp_nonce_url( admin_url( "admin-post.php?action=user_completion&amp;user_id=" . $user->ID . "&amp;button=" . rawurlencode( $info['button'] ) . "&amp;complete=false" ), 'user_completion-' . $user->ID ) ); ?>" style="display: inline;">
+            <a href="#" onclick="if (confirm('Are you sure you want to mark \'<?php echo esc_js( $button ); ?>\' as incomplete for this user?')) { this.parentNode.submit(); } return false;">Mark Incomplete</a>
           </form>
           <?php endif; ?>
         </td>
