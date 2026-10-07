@@ -436,6 +436,7 @@ class WPComplete_Admin extends WPComplete_Common {
    * @since  1.0.0
    */
   public function sanitize_license( $new ) {
+    $new = sanitize_text_field( $new );
     $old = get_option( $this->plugin_name . '_license_key' );
     if ( $old && $old != $new ) {
       delete_option( $this->plugin_name . '_license_status' ); // new license has been entered, so must reactivate
@@ -765,7 +766,7 @@ li .wpc-lesson {} li .wpc-lesson-complete {} li .wpc-lesson-completed { opacity:
       $item_name = WPCOMPLETE_PRODUCT_NAME;
 
       // retrieve the license from the database
-      $license = trim( $_POST[ $this->plugin_name . '_license_key'] );
+      $license = trim( sanitize_text_field( wp_unslash( $_POST[ $this->plugin_name . '_license_key'] ) ) );
 
       // If posted license isn't the same as what's stored, store it.
       $current = get_option( $this->plugin_name . '_license_key');
@@ -780,7 +781,7 @@ li .wpc-lesson {} li .wpc-lesson-complete {} li .wpc-lesson-completed { opacity:
         'item_name'  => urlencode( $item_name )
       );
 
-      $check_response = wp_remote_get( add_query_arg( $api_params, WPCOMPLETE_STORE_URL ), array( 'timeout' => 15, 'sslverify' => false ) );
+      $check_response = wp_remote_get( add_query_arg( $api_params, WPCOMPLETE_STORE_URL ), array( 'timeout' => 15 ) );
 
       $license_check = json_decode( wp_remote_retrieve_body( $check_response ) );
 
@@ -803,7 +804,6 @@ li .wpc-lesson {} li .wpc-lesson-complete {} li .wpc-lesson-completed { opacity:
       // Call the custom API.
       $response = wp_remote_post( WPCOMPLETE_STORE_URL, array(
         'timeout'   => 15,
-        'sslverify' => false,
         'body'      => $api_params
       ) );
 
@@ -938,13 +938,13 @@ li .wpc-lesson {} li .wpc-lesson-complete {} li .wpc-lesson-completed { opacity:
       ?>
       <script defer type="text/javascript">
         jQuery(document).ready(function() {
-          jQuery('<option>').val('completable').text("<?php _e('Can Complete', $this->plugin_name)?>").appendTo("select[name='action'],select[name='action2']");
+          jQuery('<option>').val('completable').text(<?php echo wp_json_encode( __( 'Can Complete', $this->plugin_name ) ); ?>).appendTo("select[name='action'],select[name='action2']");
 <?php
           $courses = $this->get_course_names();
           if ( count( $courses ) > 0 ) { ?>
-          jQuery('<option>').val('course::true').text("<?php echo __('Assign to: ', $this->plugin_name) . html_entity_decode(get_bloginfo( 'name' ), ENT_QUOTES | ENT_HTML401); ?>").appendTo("select[name='action'],select[name='action2']");
+          jQuery('<option>').val('course::true').text(<?php echo wp_json_encode( __( 'Assign to: ', $this->plugin_name ) . html_entity_decode( get_bloginfo( 'name' ), ENT_QUOTES | ENT_HTML401 ) ); ?>).appendTo("select[name='action'],select[name='action2']");
 <?php       foreach ( $courses as $course_name ) { ?>
-          jQuery('<option>').val('course::<?php echo esc_attr($course_name); ?>').text("<?php echo __('Assign to: ', $this->plugin_name) . $course_name; ?>").appendTo("select[name='action'],select[name='action2']");
+          jQuery('<option>').val(<?php echo wp_json_encode( 'course::' . $course_name ); ?>).text(<?php echo wp_json_encode( __( 'Assign to: ', $this->plugin_name ) . $course_name ); ?>).appendTo("select[name='action'],select[name='action2']");
 <?php       }
           } ?>
 
@@ -983,6 +983,10 @@ li .wpc-lesson {} li .wpc-lesson-complete {} li .wpc-lesson-completed { opacity:
         return;
       } // end if
 
+      if ( ! current_user_can( 'edit_post', $post_id ) ) {
+        return;
+      }
+
       // Make sure the user has permissions to posts and pages
       if ( ! in_array( $_POST['post_type'], $this->get_enabled_post_types() ) ) {
         // echo '<!-- Post type isn\'t allowed to be marked as completable -->';
@@ -994,22 +998,25 @@ li .wpc-lesson {} li .wpc-lesson-complete {} li .wpc-lesson-completed { opacity:
       // PREMIUM:
       $course_name = 'true';
       if ( isset( $_POST['wpcomplete']['course-rename'] ) && !empty( $_POST['wpcomplete']['course-rename'] ) ) {
-        $rename_course = $_POST['wpcomplete']['course-original'];
-        $course_name = esc_attr($_POST['wpcomplete']['course-rename']);
+        $rename_course = esc_attr( sanitize_text_field( wp_unslash( $_POST['wpcomplete']['course-original'] ?? '' ) ) );
+        $course_name = esc_attr( sanitize_text_field( wp_unslash( $_POST['wpcomplete']['course-rename'] ) ) );
       } else if ( isset( $_POST['wpcomplete']['course-custom'] ) && !empty( $_POST['wpcomplete']['course-custom'] ) ) {
-        $course_name = esc_attr($_POST['wpcomplete']['course-custom']);
+        $course_name = esc_attr( sanitize_text_field( wp_unslash( $_POST['wpcomplete']['course-custom'] ) ) );
       } else if ( isset( $_POST['wpcomplete']['course'] ) && !empty( $_POST['wpcomplete']['course'] ) ) {
-        $course_name = esc_attr($_POST['wpcomplete']['course']);
+        $course_name = esc_attr( sanitize_text_field( wp_unslash( $_POST['wpcomplete']['course'] ) ) );
       }
 
-      $redirect_to = ( isset( $_POST['wpcomplete']['completion-redirect-to'] ) ) ? esc_attr($_POST['wpcomplete']['completion-redirect-to']) : '';
-      $redirect_url = ( isset( $_POST['wpcomplete']['completion-redirect-url'] ) ) ? esc_url($_POST['wpcomplete']['completion-redirect-url']) : '';
+      $redirect_to = ( isset( $_POST['wpcomplete']['completion-redirect-to'] ) ) ? esc_attr( sanitize_text_field( wp_unslash( $_POST['wpcomplete']['completion-redirect-to'] ) ) ) : '';
+      $redirect_url = ( isset( $_POST['wpcomplete']['completion-redirect-url'] ) ) ? esc_url_raw( wp_unslash( $_POST['wpcomplete']['completion-redirect-url'] ) ) : '';
       $redirect = array('title' => $redirect_to, 'url' => $redirect_url);
 
       if ($is_completable == 'true') {
         // Fix when the $post_id isn't the same as the post_ID sent in:
         if ( isset($_POST['post_ID']) && ( $post_id != $_POST['post_ID'] ) ) {
           $post_id = absint($_POST['post_ID']);
+          if ( ! current_user_can( 'edit_post', $post_id ) ) {
+            return;
+          }
         }
 
         $post_meta = array();
@@ -1068,16 +1075,19 @@ li .wpc-lesson {} li .wpc-lesson-complete {} li .wpc-lesson-completed { opacity:
       update_option( $this->plugin_name . '_last_updated', time());
 
       // If user is renaming the course...
-      if ($course_name) {
+      if ( $rename_course ) {
         // find all posts with a course name of: $rename_course
         $r = $wpdb->get_results( $wpdb->prepare( "
         SELECT pm.post_id,pm.meta_value FROM {$wpdb->postmeta} pm
-        WHERE pm.meta_key = '%s'
-        AND (pm.post_id != " . $post_id . ")
-        AND (pm.meta_value LIKE '%\"course\":\"" . $rename_course . "\"%')", 'wpcomplete'), ARRAY_A );
+        WHERE pm.meta_key = %s
+        AND pm.post_id != %d
+        AND pm.meta_value LIKE %s", 'wpcomplete', $post_id, '%' . $wpdb->esc_like( '"course":"' . $rename_course . '"' ) . '%' ), ARRAY_A );
 
         // loop through all found posts
         foreach ($r as $post_meta_fields) {
+          if ( ! current_user_can( 'edit_post', $post_meta_fields['post_id'] ) ) {
+            continue;
+          }
           // and decode the post's original meta
           $post_meta = json_decode( stripslashes( $post_meta_fields['meta_value'] ), JSON_UNESCAPED_UNICODE );
           // IF the current course is the correct name,
@@ -1128,6 +1138,10 @@ li .wpc-lesson {} li .wpc-lesson-complete {} li .wpc-lesson-completed { opacity:
         // do the marking as complete!
         $marked = 0;
         foreach ( $post_ids as $post_id ) {
+          if ( ! current_user_can( 'edit_post', $post_id ) ) {
+            continue;
+          }
+
           $post_meta = get_post_meta( $post_id, 'wpcomplete', true );
 
           if ( ! $post_meta ) {
@@ -1158,7 +1172,7 @@ li .wpc-lesson {} li .wpc-lesson-complete {} li .wpc-lesson-completed { opacity:
 
         $action = ($_REQUEST['action'] == '-1') ? $_REQUEST['action2'] : $_REQUEST['action'];
         list($action, $course_name) = explode("::", $action);
-        $course_name = html_entity_decode( $course_name, ENT_QUOTES | ENT_HTML401 );
+        $course_name = sanitize_text_field( html_entity_decode( wp_unslash( $course_name ), ENT_QUOTES | ENT_HTML401 ) );
 
         // make sure ids are submitted.  depending on the resource type, this may be 'media' or 'ids'
         if ( isset($_REQUEST['post'] ) ) {
@@ -1175,11 +1189,15 @@ li .wpc-lesson {} li .wpc-lesson-complete {} li .wpc-lesson-completed { opacity:
         // do the marking as complete!
         $marked = 0;
         foreach ( $post_ids as $post_id ) {
+          if ( ! current_user_can( 'edit_post', $post_id ) ) {
+            continue;
+          }
+
           $post_meta = get_post_meta( $post_id, 'wpcomplete', true );
 
           if ( ! $post_meta ) {
             // Enable the post because it wasn't previously.
-            $post_meta = array( 'course' => $course_name );
+            $post_meta = array( 'course' => htmlentities( $course_name, ENT_QUOTES | ENT_HTML401 ) );
             // Check to see if we need to add multiple buttons to database meta info:
             $post_content = get_post_field('post_content', $post_id);
             $post_meta = $this->add_multiple_buttons_to_meta($post_id, $post_meta, $post_content);
@@ -1274,6 +1292,12 @@ li .wpc-lesson {} li .wpc-lesson-complete {} li .wpc-lesson-completed { opacity:
    * @since  2.8.8
    */
   public function dismiss_devmode_notice_handler() {
+    check_ajax_referer( 'wpc_admin_nonce', 'nonce' );
+
+    if ( ! current_user_can( 'manage_options' ) ) {
+      wp_send_json_error( 'Unauthorized', 403 );
+    }
+
     update_option( 'dismissed-devmode', TRUE );
   }
 
@@ -1283,6 +1307,12 @@ li .wpc-lesson {} li .wpc-lesson-complete {} li .wpc-lesson-completed { opacity:
    * @since  2.8.10
    */
   public function dismiss_license_notice_handler() {
+    check_ajax_referer( 'wpc_admin_nonce', 'nonce' );
+
+    if ( ! current_user_can( 'manage_options' ) ) {
+      wp_send_json_error( 'Unauthorized', 403 );
+    }
+
     update_option( 'dismissed-license', TRUE );
   }
 
@@ -1329,7 +1359,7 @@ li .wpc-lesson {} li .wpc-lesson-complete {} li .wpc-lesson-completed { opacity:
         $course_name = '—';
       }
 
-      echo '<div id="completable-course-' . $post_id . '">' . $course_name . '</div>';
+      echo '<div id="completable-course-' . esc_attr( $post_id ) . '">' . esc_html( $course_name ) . '</div>';
 
     } else if ( $column_name == 'completable' ) {
       if ( get_post_status($post_id) === 'future' ) {
@@ -1487,14 +1517,14 @@ li .wpc-lesson {} li .wpc-lesson-complete {} li .wpc-lesson-completed { opacity:
       if ($this->post_has_multiple_buttons($post_id)) {
         if ($button == $post_id) {
           $button_name = get_the_title($post_id) . " (" . ucwords( str_replace( "_", " ", get_post_type( $post_id ) ) ) . " #" . $post_id . ") - Button: Default";
-          $courses[$course_name]['buttons'][$button_name] = array('id' => $button, 'link' => "edit.php?page=wpcomplete-buttons&amp;post_id=" . $post_id . "&amp;button=" . $button, 'started' => 0, 'completed' => 0, 'status' => get_post_status($post_id) );
+          $courses[$course_name]['buttons'][$button_name] = array('id' => $button, 'link' => "edit.php?page=wpcomplete-buttons&post_id=" . $post_id . "&button=" . rawurlencode( $button ), 'started' => 0, 'completed' => 0, 'status' => get_post_status($post_id) );
         } else {
           $button_name = get_the_title($post_id) . " (" . ucwords( str_replace( "_", " ", get_post_type( $post_id ) ) ) . " #" . $post_id . ") - Button: " . $button_id;
-          $courses[$course_name]['buttons'][$button_name] = array('id' => $button, 'link' => "edit.php?page=wpcomplete-buttons&amp;post_id=" . $post_id . "&amp;button=" . $button, 'started' => 0, 'completed' => 0, 'status' => get_post_status($post_id));
+          $courses[$course_name]['buttons'][$button_name] = array('id' => $button, 'link' => "edit.php?page=wpcomplete-buttons&post_id=" . $post_id . "&button=" . rawurlencode( $button ), 'started' => 0, 'completed' => 0, 'status' => get_post_status($post_id));
         }
       } else {
         $button_name = get_the_title($post_id) . " (" . ucwords( str_replace( "_", " ", get_post_type( $post_id ) ) ) . " #" . $post_id . ")";
-        $courses[$course_name]['buttons'][$button_name] = array('id' => $button, 'link' => "edit.php?page=wpcomplete-posts&amp;post_id=" . $button, 'started' => 0, 'completed' => 0, 'status' => get_post_status($post_id));
+        $courses[$course_name]['buttons'][$button_name] = array('id' => $button, 'link' => "edit.php?page=wpcomplete-posts&post_id=" . rawurlencode( $button ), 'started' => 0, 'completed' => 0, 'status' => get_post_status($post_id));
       }
     }
 
@@ -1616,18 +1646,18 @@ li .wpc-lesson {} li .wpc-lesson-complete {} li .wpc-lesson-completed { opacity:
           $post_buttons = ( isset( $post_data['buttons'] ) && is_array( $post_data['buttons'] ) && !empty( $post_data['buttons'] ) ) ? $post_data['buttons'] : array(''.$post_id);
 
           foreach ($post_buttons as $button_id) {
-            $csv .= "\n\"".$user->id.'","'.sanitize_email($user->user_email).'","'.$post_id.'","'.$button_id.'",';
+            $csv .= "\n" . $this->csv_cell( $user->id ) . ',' . $this->csv_cell( sanitize_email( $user->user_email ) ) . ',' . $this->csv_cell( $post_id ) . ',' . $this->csv_cell( $button_id ) . ',';
             if ( isset( $user_completed_raw[$user->id][$button_id] ) ) {
               if ( isset( $user_completed_raw[$user->id][$button_id]['first_seen'] ) ) {
-                $csv .= '"'.$user_completed_raw[$user->id][$button_id]['first_seen'] . '",';
+                $csv .= $this->csv_cell( $user_completed_raw[$user->id][$button_id]['first_seen'] ) . ',';
               } else {
                 $csv .= '"No",';
               }
               if ( isset( $user_completed_raw[$user->id][$button_id]['completed'] ) ) {
                 if ($user_completed_raw[$user->id][$button_id]['completed'] === true) {
-                  $user_completed_raw[$user->id][$button_id]['completed'] = '"Yes"';
+                  $user_completed_raw[$user->id][$button_id]['completed'] = 'Yes';
                 }
-                $csv .= $user_completed_raw[$user->id][$button_id]['completed'];
+                $csv .= $this->csv_cell( $user_completed_raw[$user->id][$button_id]['completed'] );
               } else {
                 $csv .= '"No"';
               }
@@ -1857,21 +1887,21 @@ li .wpc-lesson {} li .wpc-lesson-complete {} li .wpc-lesson-completed { opacity:
       if ($button_id == $post_id) {
         header("Content-Disposition: attachment; filename=\"wpcomplete-post-$post_id.csv\";");
       } else {
-        header("Content-Disposition: attachment; filename=\"wpcomplete-button-$button_id.csv\";");
+        header("Content-Disposition: attachment; filename=\"" . sanitize_file_name( "wpcomplete-button-$button_id.csv" ) . "\";");
       }
       header("Content-Transfer-Encoding: binary");
 
       $csv = '"Student Email","Started","Completed"';
 
       foreach ($total_users as $user) {
-        $csv .= ("\n\"" . sanitize_email($user->user_email) . '",');
+        $csv .= "\n" . $this->csv_cell( sanitize_email( $user->user_email ) ) . ',';
         if ( isset($user_completed[$user->ID]['started']) ) {
-          $csv .= '"' . $user_completed[$user->ID]['started'] . '",';
+          $csv .= $this->csv_cell( $user_completed[$user->ID]['started'] ) . ',';
         } else {
           $csv .= '"No",';
         }
         if ( isset($user_completed[$user->ID]['completed']) ) {
-          $csv .= '"' . $user_completed[$user->ID]['completed'] . '"';
+          $csv .= $this->csv_cell( $user_completed[$user->ID]['completed'] );
         } else {
           $csv .= '"No"';
         }
@@ -1958,14 +1988,14 @@ li .wpc-lesson {} li .wpc-lesson-complete {} li .wpc-lesson-completed { opacity:
           if ($this->post_has_multiple_buttons($post_id)) {
             if ($button != $post_id) {
               $button_name = $post_metadata[$post_id]['title'] . " (" . ucwords( str_replace( "_", " ", $post_metadata[$post_id]['type'] ) ) . " #" . $post_id . ") - Button: " . $button_id;
-              $courses[$course_name]['buttons'][$button_name] = array('link' => "edit.php?page=wpcomplete-buttons&amp;post_id=" . $post_id . "&amp;button=" . $button);
+              $courses[$course_name]['buttons'][$button_name] = array('link' => "edit.php?page=wpcomplete-buttons&post_id=" . $post_id . "&button=" . rawurlencode( $button ));
             } else {
               $button_name = $post_metadata[$post_id]['title'] . " (" . ucwords( str_replace( "_", " ", $post_metadata[$post_id]['type'] ) ) . " #" . $post_id . ") - Default Button";
-              $courses[$course_name]['buttons'][$button_name] = array('link' => "edit.php?page=wpcomplete-posts&amp;post_id=" . $post_id);
+              $courses[$course_name]['buttons'][$button_name] = array('link' => "edit.php?page=wpcomplete-posts&post_id=" . $post_id);
             }
           } else {
             $button_name = $post_metadata[$post_id]['title'] . " (" . ucwords( str_replace( "_", " ", $post_metadata[$post_id]['type'] ) ) . " #" . $post_id . ")";
-            $courses[$course_name]['buttons'][$button_name] = array('link' => "edit.php?page=wpcomplete-posts&amp;post_id=" . $post_id);
+            $courses[$course_name]['buttons'][$button_name] = array('link' => "edit.php?page=wpcomplete-posts&post_id=" . $post_id);
           }
           if ( isset($user_completed[$button]) ) {
             $courses[$course_name]['buttons'][$button_name]['completed'] = $user_completed[$button];
@@ -2064,14 +2094,14 @@ li .wpc-lesson {} li .wpc-lesson-complete {} li .wpc-lesson-completed { opacity:
       if ($this->post_has_multiple_buttons($post_id)) {
         if ($button != $post_id) {
           $button_name = get_the_title($post_id) . " (" . ucwords( str_replace( "_", " ", get_post_type( $post_id ) ) ) . " #" . $post_id . ") - Button: " . $button_id;
-          $courses[$course_name]['buttons'][$button_name] = array('link' => "edit.php?page=wpcomplete-buttons&amp;post_id=" . $post_id . "&amp;button=" . $button, 'status' => get_post_status($post_id), 'button' => $button );
+          $courses[$course_name]['buttons'][$button_name] = array('link' => "edit.php?page=wpcomplete-buttons&post_id=" . $post_id . "&button=" . rawurlencode( $button ), 'status' => get_post_status($post_id), 'button' => $button );
         } else {
           $button_name = get_the_title($post_id) . " (" . ucwords( str_replace( "_", " ", get_post_type( $post_id ) ) ) . " #" . $post_id . ") - Default Button";
-          $courses[$course_name]['buttons'][$button_name] = array('link' => "edit.php?page=wpcomplete-posts&amp;post_id=" . $post_id, 'status' => get_post_status($post_id), 'button' => $button );
+          $courses[$course_name]['buttons'][$button_name] = array('link' => "edit.php?page=wpcomplete-posts&post_id=" . $post_id, 'status' => get_post_status($post_id), 'button' => $button );
         }
       } else {
         $button_name = get_the_title($post_id) . " (" . ucwords( str_replace( "_", " ", get_post_type( $post_id ) ) ) . " #" . $post_id . ")";
-        $courses[$course_name]['buttons'][$button_name] = array('link' => "edit.php?page=wpcomplete-posts&amp;post_id=" . $button, 'status' => get_post_status($post_id), 'button' => $button );
+        $courses[$course_name]['buttons'][$button_name] = array('link' => "edit.php?page=wpcomplete-posts&post_id=" . rawurlencode( $button ), 'status' => get_post_status($post_id), 'button' => $button );
       }
       $courses[$course_name]['buttons'][$button_name]['started'] = 'No';
       $courses[$course_name]['buttons'][$button_name]['completed'] = 'No';
@@ -2131,9 +2161,9 @@ li .wpc-lesson {} li .wpc-lesson-complete {} li .wpc-lesson-completed { opacity:
 
         foreach ($post_buttons as $button_id) {
           if ( isset( $user_completed_raw[$button_id] ) ) {
-            $csv .= "\n\"".$post_id.'","'.$button_id.'",';
+            $csv .= "\n" . $this->csv_cell( $post_id ) . ',' . $this->csv_cell( $button_id ) . ',';
             if ( isset( $user_completed_raw[$button_id]['first_seen'] ) ) {
-              $csv .= '"' . $user_completed_raw[$button_id]['first_seen'] . '",';
+              $csv .= $this->csv_cell( $user_completed_raw[$button_id]['first_seen'] ) . ',';
             } else {
               $csv .= '"No",';
             }
@@ -2141,12 +2171,12 @@ li .wpc-lesson {} li .wpc-lesson-complete {} li .wpc-lesson-completed { opacity:
               if ($user_completed_raw[$button_id]['completed'] === true) {
                 $user_completed_raw[$button_id]['completed'] = 'Yes';
               }
-              $csv .= '"' . $user_completed_raw[$button_id]['completed'] . '"';
+              $csv .= $this->csv_cell( $user_completed_raw[$button_id]['completed'] );
             } else {
               $csv .= '"No"';
             }
           } else {
-            $csv .= "\n\"" . $post_id . '","' . $button_id . '","No","No"';
+            $csv .= "\n" . $this->csv_cell( $post_id ) . ',' . $this->csv_cell( $button_id ) . ',"No","No"';
           }
         }
       }
@@ -2171,20 +2201,25 @@ li .wpc-lesson {} li .wpc-lesson-complete {} li .wpc-lesson-completed { opacity:
     $post_id = (int) sanitize_text_field( wp_unslash( $_REQUEST['post_id'] ?? '' ) );
 
     // Verify user capabilities.
-    if ( ! current_user_can( 'edit_posts', $post_id ) ) {
+    if ( ! current_user_can( 'edit_post', $post_id ) ) {
       wp_send_json_error( 'Unauthorized', 403 );
       exit;
     }
 
     $post_meta_json = get_post_meta( $post_id, 'wpcomplete', true );
+    if ( ! $post_meta_json ) {
+      wp_send_json_error( 'Not found', 404 );
+    }
     $post_meta = json_decode( stripslashes( $post_meta_json ), JSON_UNESCAPED_UNICODE );
 
     //var_dump($post_meta);
     if ( isset( $_REQUEST['button'] ) ) {
-      $buttons = $post_meta['buttons'];
+      $buttons = ( isset( $post_meta['buttons'] ) && is_array( $post_meta['buttons'] ) ) ? $post_meta['buttons'] : array();
       // delete specific button
-      $key = array_search( sanitize_text_field( wp_unslash( $_REQUEST['button'] ?? '' ) ), $buttons );
-      unset($buttons[$key]);
+      $key = array_search( wp_unslash( $_REQUEST['button'] ), $buttons, true );
+      if ( false !== $key ) {
+        unset($buttons[$key]);
+      }
     } else {
       $buttons = array();
     }
@@ -2402,7 +2437,7 @@ li .wpc-lesson {} li .wpc-lesson-complete {} li .wpc-lesson-completed { opacity:
    * @last   2.9.0.8
    */
   public function delete_user_data( ) {
-    if ( ! current_user_can( 'edit_users' ) )  {
+    if ( ! current_user_can( 'edit_user', (int) ( $_REQUEST['user_id'] ?? 0 ) ) )  {
       wp_die( __( 'You do not have sufficient permissions to access this page.' ) );
     }
     if ( ! $_GET['user_id'] ) {
@@ -2417,7 +2452,7 @@ li .wpc-lesson {} li .wpc-lesson-complete {} li .wpc-lesson-completed { opacity:
 
     // delete a users specific course info...
     if ( isset( $_REQUEST['course'] ) && !empty( $_REQUEST['course'] ) ) {
-      $course = sanitize_text_field($_REQUEST['course']);
+      $course = sanitize_text_field( wp_unslash( $_REQUEST['course'] ) );
       if ( ! wp_verify_nonce( $_REQUEST['_wpnonce'], 'delete_user_course_data-' . $user_id . '-' . $course ) ) {
         wp_die( __( 'Are you sure you have permission to do this? No nonce present.' ) );
       }
@@ -2443,8 +2478,9 @@ li .wpc-lesson {} li .wpc-lesson-complete {} li .wpc-lesson-completed { opacity:
     if ( wp_get_referer() ) {
       wp_safe_redirect( wp_get_referer() );
     } else {
-      wp_safe_redirect( admin_url("users.php?page=wpcomplete-users&user_id=" . $_REQUEST['user_id']) );
+      wp_safe_redirect( admin_url( "users.php?page=wpcomplete-users&user_id=" . $user_id ) );
     }
+    exit;
 
   }
 
@@ -2455,7 +2491,7 @@ li .wpc-lesson {} li .wpc-lesson-complete {} li .wpc-lesson-completed { opacity:
    * @last   2.9.0
    */
   public function admin_user_completion( ) {
-    if ( ! current_user_can( 'edit_users' ) )  {
+    if ( ! current_user_can( 'edit_user', (int) ( $_REQUEST['user_id'] ?? 0 ) ) )  {
       wp_die( __( 'You do not have sufficient permissions to access this page.' ) );
     }
     if ( ! $_REQUEST['user_id'] ) {
@@ -2473,20 +2509,12 @@ li .wpc-lesson {} li .wpc-lesson-complete {} li .wpc-lesson-completed { opacity:
 
     $user_completed = $this->get_user_activity($user_id);
 
-    $unique_button_id = sanitize_text_field( $_REQUEST['button'] );
+    $unique_button_id = wp_unslash( $_REQUEST['button'] ?? '' );
     list($post_id, $button_id) = $this->extract_button_info($unique_button_id);
 
-    $course = $this->post_course($post_id);
-
     $posts = $this->get_completable_posts();
-    if ( isset( $button_id ) && ( !isset( $posts[$post_id]['buttons'] ) || !in_array( $unique_button_id, $posts[$post_id]['buttons'] ) ) ) {
-      $post_meta = $posts[$post_id];
-      if ( !isset( $post_meta['buttons'] ) ) $post_meta['buttons'] = array();
-      $post_meta['buttons'][] = $unique_button_id;
-      $posts[ $post_id ] = $post_meta;
-      // Save changes:
-      update_post_meta( $post_id, 'wpcomplete', json_encode( $post_meta, JSON_UNESCAPED_UNICODE ) );
-      wp_cache_set( "posts", json_encode( $posts, JSON_UNESCAPED_UNICODE ), 'wpcomplete' );
+    if ( ! isset( $posts[ $post_id ] ) || ( '' !== $button_id && ! in_array( $unique_button_id, $posts[ $post_id ]['buttons'] ?? array(), true ) ) ) {
+      wp_die( __( 'Invalid button.' ), '', array( 'response' => 400 ) );
     }
 
     // Mark this button as completed:
@@ -2505,8 +2533,29 @@ li .wpc-lesson {} li .wpc-lesson-complete {} li .wpc-lesson-completed { opacity:
     if ( wp_get_referer() ) {
       wp_safe_redirect( wp_get_referer() );
     } else {
-      wp_safe_redirect( admin_url("users.php?page=wpcomplete-users&user_id=" . $_REQUEST['user_id']) );
+      wp_safe_redirect( admin_url( "users.php?page=wpcomplete-users&user_id=" . $user_id ) );
     }
+    exit;
+  }
+
+  /**
+   * Quotes a value as one CSV cell, neutralising leading characters that
+   * spreadsheet software would evaluate as a formula.
+   *
+   * @since 2.9.5.8
+   *
+   * @param mixed $value Cell value.
+   *
+   * @return string Quoted CSV cell.
+   */
+  private function csv_cell( $value ) {
+    $value = (string) $value;
+
+    if ( '' !== $value && false !== strpos( "=+-@\t\r", $value[0] ) ) {
+      $value = "'" . $value;
+    }
+
+    return '"' . str_replace( '"', '""', $value ) . '"';
   }
 
 }

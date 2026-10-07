@@ -28,3 +28,5 @@
 2.9.5.7 - 2026-08-12 - StellarWP
 	* Security Fix: Tightened security around user completion handling.
 	* Security Fix: Tightened security around button completion display.
+2.9.5.8 - 2026-10-06 - StellarWP
+	* Security Fix: Tightened security around course, shortcode, and report output and permissions.

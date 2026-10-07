@@ -24,11 +24,11 @@
     <p>
       <label for="course-assigned"><?php echo __( 'This is a part of:', $this->plugin_name ); ?></label>
       <select name="wpcomplete[course]" id="course-assigned" class="course-toggle course-rename" onchange="if (this.value == '--new--') { jQuery('.course-toggle').toggle(); jQuery('select.course-toggle').attr('disabled', 'disabled'); jQuery('.course-toggle input').attr('disabled', false); jQuery('.course-toggle input:last-child').focus(); this.selectedIndex = 0; } else if (this.value == '--rename--') { jQuery('.course-rename').toggle(); jQuery('select.course-rename').attr('disabled', 'disabled'); jQuery('.course-rename input').attr('disabled', false); jQuery('.course-rename input:last-child').focus(); this.selectedIndex = 0; }">
-        <option value="true"><?php echo get_bloginfo( 'name' ); ?></option>
+        <option value="true"><?php echo esc_html( get_bloginfo( 'name' ) ); ?></option>
         <?php $course_names = $this->get_course_names(); ?>
         <?php if ($course_names) : ?>
           <?php foreach ( $course_names as $course_name ) : ?>
-        <option value="<?php echo $course_name; ?>"<?php if ($course_name == $post_course) echo ' selected'; ?>><?php echo $course_name; ?></option>
+        <option value="<?php echo esc_attr( $course_name ); ?>"<?php if ($course_name == $post_course) echo ' selected'; ?>><?php echo esc_html( $course_name ); ?></option>
           <?php endforeach; ?>
           <?php if ($post_course) : ?>
         <option value="--rename--">-- <?php echo __( 'Rename current course', $this->plugin_name ); ?> --</option>
@@ -38,8 +38,8 @@
       </select>
       <?php if ($post_course) : ?>
       <span class="course-rename" style="display: none;">
-        <input type="hidden" name="wpcomplete[course-original]" value="<?php echo $post_course; ?>" disabled>
-        <input type="text" name="wpcomplete[course-rename]" value="<?php echo $post_course; ?>" disabled> or <a href="javascript:void();" onclick="jQuery('.course-rename').toggle(); jQuery('select.course-rename').attr('disabled', false); jQuery('.course-rename input').attr('disabled', 'disabled'); jQuery('select.course-rename').val('<?php echo $post_course; ?>');">cancel</a>
+        <input type="hidden" name="wpcomplete[course-original]" value="<?php echo esc_attr( $post_course ); ?>" disabled>
+        <input type="text" name="wpcomplete[course-rename]" value="<?php echo esc_attr( $post_course ); ?>" disabled> or <a href="javascript:void();" onclick="jQuery('.course-rename').toggle(); jQuery('select.course-rename').attr('disabled', false); jQuery('.course-rename input').attr('disabled', 'disabled'); jQuery('select.course-rename').val(<?php echo esc_attr( (string) wp_json_encode( $post_course ) ); ?>);">cancel</a>
       </span>
       <?php endif; ?>
       <span class="course-toggle" style="display: none;">
@@ -49,8 +49,8 @@
 
     <p>
       <label for="completion_redirect_url"><?php echo __( 'Where would you like to redirect your students upon marking all buttons on this page as completed?', $this->plugin_name ); ?></label><br>
-      <input type="text" id="completion_redirect_to" name="wpcomplete[completion-redirect-to]" value="<?php echo $redirect['title']; ?>" placeholder="">
-      <input type="hidden" id="completion_redirect_url" name="wpcomplete[completion-redirect-url]" value="<?php echo $redirect['url']; ?>">
+      <input type="text" id="completion_redirect_to" name="wpcomplete[completion-redirect-to]" value="<?php echo esc_attr( $redirect['title'] ); ?>" placeholder="">
+      <input type="hidden" id="completion_redirect_url" name="wpcomplete[completion-redirect-url]" value="<?php echo esc_url( $redirect['url'] ); ?>">
       <span class="howto"><?php echo __( 'Leave empty to not redirect.', $this->plugin_name ); ?></span>
     </p>
 
@@ -70,7 +70,7 @@
       <?php endforeach; ?>
       </ul>
         <?php if ( count( $post_meta['buttons'] ) > 1 ) : ?>
-      <a href="#" class="wpc_delete_all" data-post-id="<?php echo $post_id; ?>">Reset all buttons</a>
+      <a href="#" class="wpc_delete_all" data-post-id="<?php echo esc_attr( $post_id ); ?>">Reset all buttons</a>
         <?php endif; ?>
     </div>
       <?php endif; ?>

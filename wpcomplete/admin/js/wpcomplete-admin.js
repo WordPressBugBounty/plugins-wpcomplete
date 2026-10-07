@@ -124,14 +124,14 @@
   $( document ).on( 'click', '.dev-mode-nag .notice-dismiss', function () {
     $.ajax( ajaxurl, {
       type: 'POST',
-      data: { action: 'dismissed_devmode_notice_handler' }
+      data: { action: 'dismissed_devmode_notice_handler', nonce: WPComplete.nonce }
     });
   });
 
   $( document ).on( 'click', '.license-nag .notice-dismiss', function () {
     $.ajax( ajaxurl, {
       type: 'POST',
-      data: { action: 'dismissed_license_notice_handler' }
+      data: { action: 'dismissed_license_notice_handler', nonce: WPComplete.nonce }
     });
   });
 

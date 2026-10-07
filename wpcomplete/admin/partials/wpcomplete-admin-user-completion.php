@@ -2,13 +2,13 @@
 <div class="wrap">
 
   <h1>
-    User Completion - <?php echo $user->user_email; ?> 
+    User Completion - <?php echo esc_html( $user->user_email ); ?> 
     <span style="text-align: right; float: right; font-size: 13px;">
-      <a href="<?php echo $_SERVER['REQUEST_URI']; ?>&amp;export" class="button button-primary">Export to CSV</a><br>
+      <a href="<?php echo esc_url( add_query_arg( 'export', '' ) ); ?>" class="button button-primary">Export to CSV</a><br>
       <br>
       <?php echo $user_completed_count; ?> / <?php echo count($total_posts); ?> completed in total
       <?php if (count($user_completed) > 0) : ?>
-      <form method="post" action="<?php echo wp_nonce_url( admin_url( "admin-post.php?action=delete_user_data&amp;user_id=" . $user->ID ), 'delete_user_data-' . $user->ID ); ?>" style="display: inline;">
+      <form method="post" action="<?php echo esc_url( wp_nonce_url( admin_url( "admin-post.php?action=delete_user_data&user_id=" . $user->ID ), 'delete_user_data-' . $user->ID ) ); ?>" style="display: inline;">
         - <a href="#" onclick="if (confirm('Are you sure you want to delete all of this user\'s completion data?')) { console.log(this.parentNode); this.parentNode.submit(); } return false;">DELETE ALL DATA</a>
       </form>
       <?php endif; ?>
@@ -16,15 +16,15 @@
   </h1>
 
   <?php foreach ($courses as $name => $values) : ?>
-  <div class="tablenav top" id="<?php echo $name; ?>" style="padding-top: 32px;">
+  <div class="tablenav top" id="<?php echo esc_attr( $name ); ?>" style="padding-top: 32px;">
     <div class="alignleft actions bulkactions">
-      <h2 style="margin-top: 8px;"><?php echo $name; ?></h2>
+      <h2 style="margin-top: 8px;"><?php echo esc_html( $name ); ?></h2>
     </div>
     <div class="one-page" style="float: right; height: 28px; margin-top: 3px; cursor: default; color: #555;">
       <span class="displaying-num">
         <?php echo $values['stats']['completed']; ?> / <?php echo count($values['buttons']); ?> completed
         <?php if ($values['stats']['completed'] > 0) : ?>
-        <form method="post" action="<?php echo wp_nonce_url( admin_url( "admin-post.php?action=delete_user_data&amp;user_id=" . $user->ID . "&amp;course=" . $name ), 'delete_user_course_data-' . $user->ID . '-' . $name ); ?>" style="display: inline;">
+        <form method="post" action="<?php echo esc_url( wp_nonce_url( admin_url( "admin-post.php?action=delete_user_data&user_id=" . $user->ID . "&course=" . rawurlencode( $name ) ), 'delete_user_course_data-' . $user->ID . '-' . sanitize_text_field( $name ) ) ); ?>" style="display: inline;">
         - <a href="#" onclick="if (confirm('Are you sure you want to delete this user\'s course completion data?')) { console.log(this.parentNode); this.parentNode.submit(); } return false;">DELETE COURSE DATA</a>
         </form>
         <?php endif; ?>
@@ -60,7 +60,7 @@
           </div>
         </td>
         <td class='completable column-completable' data-colname="Completed">
-          <div id="completable-<?php echo $this->get_course_class($info['button']); ?>">
+          <div id="completable-<?php echo esc_attr( $this->get_course_class($info['button']) ); ?>">
             <?php if ( $info['status'] === 'future' ) : ?>
             Scheduled
             <?php elseif ( $info['status'] === 'pending' ) : ?>

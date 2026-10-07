@@ -286,23 +286,29 @@ class WPComplete_Common {
       return json_decode( $posts_json, true );      
     }
 
+    $post_types = array_values( (array) $this->get_enabled_post_types() );
+    if ( empty( $post_types ) ) {
+      return array();
+    }
+    $post_type_placeholders = implode( ',', array_fill( 0, count( $post_types ), '%s' ) );
+
     if ( $include_scheduled === 'false' ) {
       $r = $wpdb->get_results( $wpdb->prepare( "
           SELECT pm.post_id,pm.meta_value,p.post_status FROM {$wpdb->postmeta} pm
           LEFT JOIN {$wpdb->posts} p ON p.ID = pm.post_id
-          WHERE pm.meta_key = '%s' 
-          AND (p.post_status != '%s')
-          AND (p.post_status != '%s')
-          AND (p.post_status != '%s')
-          AND (p.post_status != '%s')
-          AND (p.post_type = '" . join("' OR p.post_type = '", $this->get_enabled_post_types()) . "') ORDER BY p.menu_order, p.post_title ASC", 'wpcomplete', 'trash', 'draft', 'future', 'pending'), ARRAY_A );
+          WHERE pm.meta_key = %s
+          AND (p.post_status != %s)
+          AND (p.post_status != %s)
+          AND (p.post_status != %s)
+          AND (p.post_status != %s)
+          AND p.post_type IN ({$post_type_placeholders}) ORDER BY p.menu_order, p.post_title ASC", array_merge( array( 'wpcomplete', 'trash', 'draft', 'future', 'pending' ), $post_types ) ), ARRAY_A );
     } else {
       $r = $wpdb->get_results( $wpdb->prepare( "
           SELECT pm.post_id,pm.meta_value,p.post_status FROM {$wpdb->postmeta} pm
           LEFT JOIN {$wpdb->posts} p ON p.ID = pm.post_id
-          WHERE pm.meta_key = '%s' 
-          AND (p.post_status != '%s')
-          AND (p.post_type = '" . join("' OR p.post_type = '", $this->get_enabled_post_types()) . "') ORDER BY p.menu_order, p.post_title ASC", 'wpcomplete', 'trash'), ARRAY_A );
+          WHERE pm.meta_key = %s
+          AND (p.post_status != %s)
+          AND p.post_type IN ({$post_type_placeholders}) ORDER BY p.menu_order, p.post_title ASC", array_merge( array( 'wpcomplete', 'trash' ), $post_types ) ), ARRAY_A );
     }
 
     if ($r && ( count($r) > 0 ) ) {

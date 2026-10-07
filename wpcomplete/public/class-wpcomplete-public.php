@@ -53,10 +53,10 @@ class WPComplete_Public extends WPComplete_Common {
         wp_enqueue_style( $this->plugin_name );
       } else {
         wp_register_style( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'css/wpcomplete-public.css', array(), $this->version, 'all' );
-      
-        $bar_theme = get_option( $this->plugin_name . '_theme_bar_graph', 'classic' );
-        $radial_theme = get_option( $this->plugin_name . '_theme_radial_graph', 'classic' );
-        
+
+        $bar_theme = sanitize_key( $this->get_string_option( '_theme_bar_graph', 'classic' ) );
+        $radial_theme = sanitize_key( $this->get_string_option( '_theme_radial_graph', 'classic' ) );
+
         if ( $bar_theme !== 'false') {
           wp_register_style( $this->plugin_name . '-bar-graph', plugin_dir_url( __FILE__ ) . 'partials/themes/' . $bar_theme . '/bar-graph.css', array(), $this->version, 'all' );
         }
@@ -236,6 +236,24 @@ class WPComplete_Public extends WPComplete_Common {
 
     $unique_button_id = $this->get_button_id($post_id, $button_id);
 
+    /*
+     * Only the content author's authority may add buttons to a post, so a shortcode
+     * can't plant buttons on, or autocomplete, posts its author couldn't edit.
+     */
+    $can_register = ( get_current_user_id() > 0 ) && ( ( $post_id === get_the_ID() ) || user_can( (int) get_post_field( 'post_author', get_post() ), 'edit_post', $post_id ) );
+
+    $posts = $this->get_completable_posts();
+    if ( $can_register && ( !isset( $posts[$post_id]['buttons'] ) || !in_array( $unique_button_id, $posts[$post_id]['buttons'] ) ) ) {
+      $post_meta = $posts[$post_id];
+      if ( !isset( $post_meta['buttons'] ) ) $post_meta['buttons'] = array();
+      $post_meta['buttons'][] = $unique_button_id;
+      $posts[ $post_id ] = $post_meta;
+      // Save changes:
+      update_post_meta( $post_id, 'wpcomplete', json_encode( $post_meta, JSON_UNESCAPED_UNICODE ) );
+      wp_cache_delete( 'posts-true', 'wpcomplete' );
+      wp_cache_delete( 'posts-false', 'wpcomplete' );
+    }
+
     $user_activity = $this->get_user_activity();
     if ( !isset( $user_activity[$unique_button_id] ) ) $user_activity[$unique_button_id] = array();
     if ( !isset( $user_activity[$unique_button_id]['first_seen'] ) && !isset( $user_activity[$unique_button_id]['completed'] )  ) {
@@ -243,42 +261,9 @@ class WPComplete_Public extends WPComplete_Common {
       $this->set_user_activity($user_activity);
     }
 
-    // Register named buttons only on a genuine front-end render, where the id is
-    // derived from author-defined shortcode attributes. AJAX callbacks
-    // (get_button, mark_completed, mark_uncompleted) also reach this method to
-    // re-render button HTML from a client-supplied id, so registration must never
-    // happen during AJAX: otherwise any authenticated user could inject arbitrary
-    // buttons here - the very write the completion endpoint now refuses - and
-    // distort everyone's progress or grow the meta without bound (DoS).
-    if ( ! empty( $button_id ) && ! ( defined( 'DOING_AJAX' ) && DOING_AJAX ) ) {
-      $posts = $this->get_completable_posts();
-      if ( isset( $posts[ $post_id ] ) && ( !isset( $posts[$post_id]['buttons'] ) || !in_array( $unique_button_id, $posts[$post_id]['buttons'], true ) ) ) {
-        $post_meta = $posts[$post_id];
-        if ( !isset( $post_meta['buttons'] ) ) $post_meta['buttons'] = array();
-        $post_meta['buttons'][] = $unique_button_id;
-        update_post_meta( $post_id, 'wpcomplete', json_encode( $post_meta, JSON_UNESCAPED_UNICODE ) );
-        // Invalidate the cached completable-posts sets so the new button is
-        // visible to the completion endpoint on the next request.
-        wp_cache_delete( 'posts-true', 'wpcomplete' );
-        wp_cache_delete( 'posts-false', 'wpcomplete' );
-      }
-    }
-
     // NOTE: if you have graphs that were loaded before this, they will be out of date...
     // We should recommend that if someone uses autocomplete, they should also use async.
-    if ( isset( $atts['autocomplete'] ) && !isset( $user_activity[$unique_button_id]['completed'] ) ) {
-      $posts = $this->get_completable_posts();
-      // Check to see if button isn't registed yet:
-      if ( isset( $button_id ) && ( !isset( $posts[$post_id]['buttons'] ) || !in_array( $unique_button_id, $posts[$post_id]['buttons'] ) ) ) {
-        $post_meta = $posts[$post_id];
-        if ( !isset( $post_meta['buttons'] ) ) $post_meta['buttons'] = array();
-        $post_meta['buttons'][] = $unique_button_id;
-        $posts[ $post_id ] = $post_meta;
-        // Save changes:
-        update_post_meta( $post_id, 'wpcomplete', json_encode( $post_meta, JSON_UNESCAPED_UNICODE ) );
-        wp_cache_set( "posts", json_encode( $posts, JSON_UNESCAPED_UNICODE ), 'wpcomplete' );
-      }
-
+    if ( $can_register && isset( $atts['autocomplete'] ) && !isset( $user_activity[$unique_button_id]['completed'] ) ) {
       // Mark this button as completed:
       if ( ! isset( $user_activity[ $unique_button_id ] ) ) $user_activity[ $unique_button_id ] = array();
       $user_activity[ $unique_button_id ]['completed'] = date('Y-m-d H:i:s');
@@ -316,7 +301,7 @@ class WPComplete_Public extends WPComplete_Common {
     }
     $redirect_url = false;
     if ( isset( $atts['redirect'] ) && !empty( $atts['redirect'] ) ) {
-      $redirect_url = sanitize_text_field($atts['redirect']);
+      $redirect_url = wp_validate_redirect( esc_url_raw( $atts['redirect'] ), '' ) ?: false;
     }
     $custom_classes = false;
     if ( isset( $atts['class'] ) && !empty( $atts['class'] ) ) {
@@ -483,8 +468,8 @@ class WPComplete_Public extends WPComplete_Common {
       exit;
     }
 
-    $bar_theme = get_option( $this->plugin_name . '_theme_bar_graph', 'classic' );
-    $radial_theme = get_option( $this->plugin_name . '_theme_radial_graph', 'classic' );
+    $bar_theme = sanitize_key( $this->get_string_option( '_theme_bar_graph', 'classic' ) );
+    $radial_theme = sanitize_key( $this->get_string_option( '_theme_radial_graph', 'classic' ) );
     $loading = false;
 
     $courses = $this->get_course_names();
@@ -553,7 +538,7 @@ class WPComplete_Public extends WPComplete_Common {
 
       return;
     }
-    $radial_theme = get_option( $this->plugin_name . '_theme_radial_graph', 'classic' );
+    $radial_theme = sanitize_key( $this->get_string_option( '_theme_radial_graph', 'classic' ) );
     if ( $radial_theme === 'false' ) {
       /**
        * Action that is fired when a radial progress graph should be displayed
@@ -615,7 +600,7 @@ class WPComplete_Public extends WPComplete_Common {
 
       return;
     }
-    $bar_theme = get_option( $this->plugin_name . '_theme_bar_graph', 'classic' );
+    $bar_theme = sanitize_key( $this->get_string_option( '_theme_bar_graph', 'classic' ) );
     if ( $bar_theme === 'false' ) {
       /**
        * Action that is fired when a course progress graph should be displayed
@@ -697,24 +682,24 @@ li .wpc-lesson-completed { opacity: .5; }
 li .wpc-lesson-completed:after { content: "✔"; margin-left: 5px; }
 ';
 
-    $complete_background = get_option( $this->plugin_name . '_incomplete_background', '#ff0000' );
-    $complete_color = get_option( $this->plugin_name . '_incomplete_color', '#ffffff' );
-    $completed_background = get_option( $this->plugin_name . '_completed_background', '#666666' );
-    $completed_color = get_option( $this->plugin_name . '_completed_color', '#ffffff' );
-    $graph_primary_color = get_option( $this->plugin_name . '_graph_primary', '#97a71d' );
-    $graph_secondary_color = get_option( $this->plugin_name . '_graph_secondary', '#ebebeb' );
-    
+    $complete_background = sanitize_hex_color( $this->get_string_option( '_incomplete_background', '#ff0000' ) ) ?: '#ff0000';
+    $complete_color = sanitize_hex_color( $this->get_string_option( '_incomplete_color', '#ffffff' ) ) ?: '#ffffff';
+    $completed_background = sanitize_hex_color( $this->get_string_option( '_completed_background', '#666666' ) ) ?: '#666666';
+    $completed_color = sanitize_hex_color( $this->get_string_option( '_completed_color', '#ffffff' ) ) ?: '#ffffff';
+    $graph_primary_color = sanitize_hex_color( $this->get_string_option( '_graph_primary', '#97a71d' ) ) ?: '#97a71d';
+    $graph_secondary_color = sanitize_hex_color( $this->get_string_option( '_graph_secondary', '#ebebeb' ) ) ?: '#ebebeb';
+
     $radial_styles = " .wpc-radial-progress { background-color: $graph_secondary_color; } .wpc-radial-progress .wpc-fill { background-color: $graph_primary_color; } .wpc-radial-progress .wpc-numbers { color: $graph_primary_color; } ";
     $bar_styles = " .wpc-bar-progress .wpc-progress-track { background-color: $graph_secondary_color; } .wpc-bar-progress .wpc-progress-fill { background-color: $graph_primary_color; } .wpc-bar-progress .wpc-numbers { color: $graph_primary_color; } .wpc-bar-progress[data-progress=\"75\"] .wpc-numbers, .wpc-bar-progress[data-progress=\"76\"] .wpc-numbers, .wpc-bar-progress[data-progress=\"77\"] .wpc-numbers, .wpc-bar-progress[data-progress=\"78\"] .wpc-numbers, .wpc-bar-progress[data-progress=\"79\"] .wpc-numbers, .wpc-bar-progress[data-progress=\"80\"] .wpc-numbers, .wpc-bar-progress[data-progress=\"81\"] .wpc-numbers, .wpc-bar-progress[data-progress=\"82\"] .wpc-numbers, .wpc-bar-progress[data-progress=\"83\"] .wpc-numbers, .wpc-bar-progress[data-progress=\"84\"] .wpc-numbers, .wpc-bar-progress[data-progress=\"85\"] .wpc-numbers, .wpc-bar-progress[data-progress=\"86\"] .wpc-numbers, .wpc-bar-progress[data-progress=\"87\"] .wpc-numbers, .wpc-bar-progress[data-progress=\"88\"] .wpc-numbers, .wpc-bar-progress[data-progress=\"89\"] .wpc-numbers, .wpc-bar-progress[data-progress=\"90\"] .wpc-numbers, .wpc-bar-progress[data-progress=\"91\"] .wpc-numbers, .wpc-bar-progress[data-progress=\"92\"] .wpc-numbers, .wpc-bar-progress[data-progress=\"93\"] .wpc-numbers, .wpc-bar-progress[data-progress=\"94\"] .wpc-numbers, .wpc-bar-progress[data-progress=\"95\"] .wpc-numbers, .wpc-bar-progress[data-progress=\"96\"] .wpc-numbers, .wpc-bar-progress[data-progress=\"97\"] .wpc-numbers, .wpc-bar-progress[data-progress=\"98\"] .wpc-numbers, .wpc-bar-progress[data-progress=\"99\"] .wpc-numbers, .wpc-bar-progress[data-progress=\"100\"] .wpc-numbers { color: $graph_secondary_color; } ";
 
     $graph_styles = '';
-    $bar_theme = get_option( $this->plugin_name . '_theme_bar_graph', 'classic' );
-    $radial_theme = get_option( $this->plugin_name . '_theme_radial_graph', 'classic' );
-    
+    $bar_theme = sanitize_key( $this->get_string_option( '_theme_bar_graph', 'classic' ) );
+    $radial_theme = sanitize_key( $this->get_string_option( '_theme_radial_graph', 'classic' ) );
+
     if ( $bar_theme === 'classic' )     $graph_styles .= $bar_styles;
     if ( $radial_theme === 'classic' )  $graph_styles .= $radial_styles;
 
-    $custom_styles = get_option( $this->plugin_name . '_custom_styles', $style_default );
+    $custom_styles = wp_strip_all_tags( $this->get_string_option( '_custom_styles', $style_default ) );
 
     echo "<style type=\"text/css\"> a.wpc-complete { background: $complete_background; color: $complete_color; } a.wpc-completed { background: $completed_background; color: $completed_color; } $graph_styles .wpc-reset-link { color: $graph_primary_color; background-color: $graph_secondary_color; } $custom_styles </style>";
   }
@@ -820,7 +805,7 @@ li .wpc-lesson-completed:after { content: "✔"; margin-left: 5px; }
     // Without this check the user-meta write below is unconditional, so a subscriber
     // could supply any post ID and trigger completion-gated content, webhooks, or
     // certificate generation for posts they were never enrolled in.
-    if ( ! isset( $posts[ $post_id ] ) ) {
+    if ( ! isset( $posts[ $post_id ] ) || ! current_user_can( 'read_post', $post_id ) ) {
       wp_send_json_error( 'Invalid button', 403 );
     }
 
@@ -1032,7 +1017,7 @@ li .wpc-lesson-completed:after { content: "✔"; margin-left: 5px; }
       die();
     } else {
       if ( isset( $_REQUEST['redirect'] ) ) {
-        wp_redirect( $_REQUEST['redirect'] );
+        wp_safe_redirect( $_REQUEST['redirect'] );
       } else if ( wp_get_referer() ) {
         wp_safe_redirect( wp_get_referer() );
       } else {
@@ -1080,6 +1065,10 @@ li .wpc-lesson-completed:after { content: "✔"; margin-left: 5px; }
     $post_id          = (int) $m[1];
     $button_id        = $m[2] ?? '';
     $unique_button_id = empty( $button_id ) ? (string) $post_id : $post_id . '-' . $button_id;
+
+    if ( ! $this->is_registered_button( $unique_button_id ) || ! current_user_can( 'read_post', $post_id ) ) {
+      wp_send_json_error( 'Invalid button', 400 );
+    }
 
     $course = $this->post_course($post_id);
     $previous_post_status = $this->post_completion_status($post_id);
@@ -1202,6 +1191,9 @@ li .wpc-lesson-completed:after { content: "✔"; margin-left: 5px; }
       $total_posts = $this->get_completable_posts();
       $user_completed = $this->get_user_completed();
       foreach ( $total_posts as $post_id => $value ) {
+        if ( ! current_user_can( 'read_post', $post_id ) ) {
+          continue;
+        }
         $status = $this->post_completion_status( $post_id, $user_id, $value, $user_completed );
         $updates_to_sendback[ get_permalink( $post_id ) ] = array(
           'id' => $post_id,
@@ -1691,6 +1683,9 @@ li .wpc-lesson-completed:after { content: "✔"; margin-left: 5px; }
 
       $r = wp_parse_args( $args, $defaults );
 
+      // Shortcode attributes must not widen the query to posts the viewer can't read.
+      $r['post_status'] = current_user_can( 'read_private_posts' ) ? array( 'publish', 'private' ) : 'publish';
+
       if ( ! in_array( $r['item_spacing'], array( 'preserve', 'discard' ), true ) ) {
         // invalid value, fall back to default.
         $r['item_spacing'] = $defaults['item_spacing'];
@@ -1759,7 +1754,7 @@ li .wpc-lesson-completed:after { content: "✔"; margin-left: 5px; }
       if ( ! empty( $pages ) ) {
         if ( $r['walker'] === 'false' ) {
           foreach ($pages as $page) {
-            $output .= '<li class="page_item page-item-' . $page->ID . '"><a href="' . esc_url( get_permalink( $page ) ) . '">' . $page->post_title . '</a></li>';
+            $output .= '<li class="page_item page-item-' . $page->ID . '"><a href="' . esc_url( get_permalink( $page ) ) . '">' . wp_kses( $page->post_title, array('strong' => array(), 'em' => array(), 'b' => array(), 'i' => array()) ) . '</a></li>';
           }
         } else {
           $output .= walk_page_tree( $pages, $r['depth'], 0, $r );
@@ -1849,14 +1844,14 @@ li .wpc-lesson-completed:after { content: "✔"; margin-left: 5px; }
         $output .= '>';
         if ( $r['walker'] === 'false' ) {
           foreach ($pages as $page) {
-            $output .= '<li class="page_item page-item-' . $page->ID . '"><a href="' . esc_url( get_permalink( $page ) ) . '">' . $page->post_title . '</a></li>';
+            $output .= '<li class="page_item page-item-' . $page->ID . '"><a href="' . esc_url( get_permalink( $page ) ) . '">' . wp_kses( $page->post_title, array('strong' => array(), 'em' => array(), 'b' => array(), 'i' => array()) ) . '</a></li>';
           }
         } else {
           $output .= walk_page_tree( $pages, $r['depth'], $current_page, $r );
         }
         $output .= '</ul>';
       } else if ( isset( $r['empty'] ) ) {
-        $output .= '<div class="wpc-list wpc-list-empty">' . html_entity_decode( $r['empty'], ENT_QUOTES | ENT_HTML401 ) . '</div>';
+        $output .= '<div class="wpc-list wpc-list-empty">' . wp_kses_post( html_entity_decode( $r['empty'], ENT_QUOTES | ENT_HTML401 ) ) . '</div>';
       } else {
         $output .= "<!-- No pages found for " . var_export($atts, true) . " -->";
       }
@@ -1941,11 +1936,11 @@ li .wpc-lesson-completed:after { content: "✔"; margin-left: 5px; }
         // if has attribute "json", return a json string
         } else if ( isset( $args['json'] ) && ( $args['json'] === 'true' ) ) {
           echo json_encode( array( 
-            "url" => $post_url, 
-            'id' => $page_id, 
+            "url" => $post_url,
+            'id' => $page_id,
             'title' => $page->post_title,
-            'display' => html_entity_decode($prepend, ENT_QUOTES | ENT_HTML401) . $post_title . html_entity_decode($append, ENT_QUOTES | ENT_HTML401)
-          ), JSON_UNESCAPED_UNICODE );
+            'display' => wp_kses( html_entity_decode($prepend, ENT_QUOTES | ENT_HTML401) . $post_title . html_entity_decode($append, ENT_QUOTES | ENT_HTML401), array('strong' => array(), 'em' => array(), 'b' => array(), 'i' => array()) )
+          ), JSON_UNESCAPED_UNICODE | JSON_HEX_TAG );
         } else {
           include 'partials/wpcomplete-public-nav-link.php';
         }
@@ -2060,11 +2055,11 @@ li .wpc-lesson-completed:after { content: "✔"; margin-left: 5px; }
       // if has attribute "json", return a json string
       } else if ( isset( $args['json'] ) && ( $args['json'] === 'true' ) ) {
         echo json_encode( array( 
-          "url" => $post_url, 
-          'id' => $last_page_id, 
+          "url" => $post_url,
+          'id' => $last_page_id,
           'title' => $last_page->post_title,
-          'display' => html_entity_decode($prepend, ENT_QUOTES | ENT_HTML401) . $post_title . html_entity_decode($append, ENT_QUOTES | ENT_HTML401)
-        ), JSON_UNESCAPED_UNICODE );
+          'display' => wp_kses( html_entity_decode($prepend, ENT_QUOTES | ENT_HTML401) . $post_title . html_entity_decode($append, ENT_QUOTES | ENT_HTML401), array('strong' => array(), 'em' => array(), 'b' => array(), 'i' => array()) )
+        ), JSON_UNESCAPED_UNICODE | JSON_HEX_TAG );
       } else {
         include 'partials/wpcomplete-public-nav-link.php';
       }
@@ -2156,11 +2151,11 @@ li .wpc-lesson-completed:after { content: "✔"; margin-left: 5px; }
       // if has attribute "json", return a json string
       } else if ( isset( $args['json'] ) && ( $args['json'] === 'true' ) ) {
         echo json_encode( array( 
-          "url" => $post_url, 
-          'id' => $next_page->ID, 
+          "url" => $post_url,
+          'id' => $next_page->ID,
           'title' => $next_page->post_title,
-          'display' => html_entity_decode($prepend, ENT_QUOTES | ENT_HTML401) . $post_title . html_entity_decode($append, ENT_QUOTES | ENT_HTML401)
-        ), JSON_UNESCAPED_UNICODE );
+          'display' => wp_kses( html_entity_decode($prepend, ENT_QUOTES | ENT_HTML401) . $post_title . html_entity_decode($append, ENT_QUOTES | ENT_HTML401), array('strong' => array(), 'em' => array(), 'b' => array(), 'i' => array()) )
+        ), JSON_UNESCAPED_UNICODE | JSON_HEX_TAG );
       } else {
         include 'partials/wpcomplete-public-nav-link.php';
       }
@@ -2252,11 +2247,11 @@ li .wpc-lesson-completed:after { content: "✔"; margin-left: 5px; }
       // if has attribute "json", return a json string
       } else if ( isset( $args['json'] ) && ( $args['json'] === 'true' ) ) {
         echo json_encode( array( 
-          "url" => $post_url, 
-          'id' => $prev_page->ID, 
+          "url" => $post_url,
+          'id' => $prev_page->ID,
           'title' => $prev_page->post_title,
-          'display' => html_entity_decode($prepend, ENT_QUOTES | ENT_HTML401) . $post_title . html_entity_decode($append, ENT_QUOTES | ENT_HTML401)
-        ), JSON_UNESCAPED_UNICODE );
+          'display' => wp_kses( html_entity_decode($prepend, ENT_QUOTES | ENT_HTML401) . $post_title . html_entity_decode($append, ENT_QUOTES | ENT_HTML401), array('strong' => array(), 'em' => array(), 'b' => array(), 'i' => array()) )
+        ), JSON_UNESCAPED_UNICODE | JSON_HEX_TAG );
       } else {
         include 'partials/wpcomplete-public-nav-link.php';
       }
@@ -2352,8 +2347,8 @@ li .wpc-lesson-completed:after { content: "✔"; margin-left: 5px; }
       $output = '<!-- Tracking user count is 0 -->';
     } else {
       $output = '';
-      $output .= '<div class="wpc-peer-pressure wpc-peer-pressure-' . $uid . '" data-zero="' . $zero . '" data-single="' . $single . '" data-plural="' . $plural . '" data-completed="' . $completed . '">';
-      
+      $output .= '<div class="wpc-peer-pressure wpc-peer-pressure-' . esc_attr( $uid ) . '" data-zero="' . esc_attr( $this->kses_inline( $zero ) ) . '" data-single="' . esc_attr( $this->kses_inline( $single ) ) . '" data-plural="' . esc_attr( $this->kses_inline( $plural ) ) . '" data-completed="' . esc_attr( $this->kses_inline( $completed ) ) . '">';
+
       // 2. if any, run $copy through a replace and display that.
       if ( $stats['user_completed'] ) {
         $copy = $completed;
@@ -2370,10 +2365,10 @@ li .wpc-lesson-completed:after { content: "✔"; margin-left: 5px; }
           $stats['{number}'], 
           $stats['{percentage}'], 
           $stats['{next_with_ordinal}'] 
-        ), 
+        ),
         $copy
       );
-      $output .= $copy;
+      $output .= $this->kses_inline( $copy );
 
       $output .= '</div>';
     }
@@ -2549,7 +2544,7 @@ li .wpc-lesson-completed:after { content: "✔"; margin-left: 5px; }
     $course = false;
     if ( isset( $atts['course'] ) && !empty( $atts['course'] ) ) {
       $course = sanitize_text_field($atts['course']);
-      $reset_url = admin_url( 'admin-post.php?action=reset&course=' . $course);
+      $reset_url = admin_url( 'admin-post.php?action=reset&course=' . urlencode($course));
     }
     $classes = '';
     if ( isset( $atts['class'] ) && !empty( $atts['class'] ) ) {
@@ -2571,6 +2566,9 @@ li .wpc-lesson-completed:after { content: "✔"; margin-left: 5px; }
     if ( isset( $atts['no_change_text'] ) ) {
       $no_change_text = sanitize_text_field($atts['no_change_text']);
     }
+    $success_text = $this->kses_inline( $success_text );
+    $failure_text = $this->kses_inline( $failure_text );
+    $no_change_text = $this->kses_inline( $no_change_text );
 
     // add a nonce
     $reset_url = wp_nonce_url( $reset_url, 'reset-account_' . get_current_user_id() );
@@ -2691,6 +2689,61 @@ li .wpc-lesson-completed:after { content: "✔"; margin-left: 5px; }
       // redirect back to referral page
       wp_safe_redirect( add_query_arg('wpc_reset', ( ($saved) ? 'success' : 'failed' ), $wp_ref ) );
     }
+  }
+
+  /**
+   * Whether a button id belongs to a completable post: either the post's default
+   * button or one already registered in its meta.
+   *
+   * @since 2.9.5.8
+   *
+   * @param string $unique_button_id Button id in the `<post_id>[-<name>]` form.
+   *
+   * @return bool True when the button can be completed.
+   */
+  private function is_registered_button( $unique_button_id ) {
+    list($post_id, $button_id) = $this->extract_button_info( $unique_button_id );
+
+    $posts = $this->get_completable_posts();
+    if ( ! isset( $posts[ $post_id ] ) ) {
+      return false;
+    }
+
+    if ( '' === $button_id ) {
+      return $unique_button_id === (string) $post_id;
+    }
+
+    return isset( $posts[ $post_id ]['buttons'] ) && in_array( $unique_button_id, $posts[ $post_id ]['buttons'], true );
+  }
+
+  /**
+   * Reads a plugin option that must be a string, falling back when it is not.
+   *
+   * @since 2.9.5.8
+   *
+   * @param string $name     Option name without the plugin prefix, e.g. `_custom_styles`.
+   * @param string $fallback Value used when the option is missing or not a string.
+   *
+   * @return string Option value.
+   */
+  private function get_string_option( $name, $fallback ) {
+    $value = get_option( $this->plugin_name . $name, $fallback );
+
+    return is_string( $value ) ? $value : $fallback;
+  }
+
+  /**
+   * Decodes shortcode copy and keeps only the inline formatting tags, so the
+   * result is safe for both HTML output and the front-end script's .html().
+   *
+   * @since 2.9.5.8
+   *
+   * @param string $text Shortcode copy, possibly entity-encoded.
+   *
+   * @return string Filtered HTML.
+   */
+  private function kses_inline( $text ) {
+    return wp_kses( html_entity_decode( $text, ENT_QUOTES | ENT_HTML401 ), array( 'strong' => array(), 'em' => array(), 'b' => array(), 'i' => array() ) );
   }
 
 }

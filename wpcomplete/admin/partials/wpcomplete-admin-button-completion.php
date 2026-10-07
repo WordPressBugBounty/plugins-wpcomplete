@@ -32,7 +32,7 @@
   <tbody id="the-list" data-wp-lists='list:users'>
     <?php foreach ($total_users as $user) : ?>
     <tr id='user-<?php echo $user->ID; ?>'>
-      <td class='name column-name' data-colname="Name"><a href="users.php?page=wpcomplete-users&amp;user_id=<?php echo $user->ID; ?>"><?php echo $user->user_email; ?></a></td>
+      <td class='name column-name' data-colname="Name"><a href="users.php?page=wpcomplete-users&amp;user_id=<?php echo $user->ID; ?>"><?php echo esc_html( $user->user_email ); ?></a></td>
       <?php if (count($total_users) > 0) : ?>
       <td class='completable column-started num' data-colname="Started">
         <div id="completable-<?php echo $user->ID; ?>-started">

@@ -8,7 +8,7 @@
   </tr>
 <?php foreach ($courses as $course_name => $course_info) { ?>
 <tr>
-  <td><?php echo $course_name; ?></td>
+  <td><?php echo esc_html( $course_name ); ?></td>
   <td style="text-align: center;"><?php echo $course_info['buttons']; ?></td>
   <td style="text-align: center;"><?php echo $course_info['started']; ?> User<?php if ( $course_info['started'] !== 1) echo 's'; ?></td>
   <td style="text-align: center;"><?php echo $course_info['finished']; ?> User<?php if ( $course_info['finished'] !== 1) echo 's'; ?></td>

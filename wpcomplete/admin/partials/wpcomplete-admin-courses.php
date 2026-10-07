@@ -2,7 +2,7 @@
 
   <div style="float: right">
 
-    <a href="<?php echo $_SERVER['REQUEST_URI']; ?>&amp;export" class="button button-primary">Export to CSV</a>
+    <a href="<?php echo esc_url( add_query_arg( 'export', '' ) ); ?>" class="button button-primary">Export to CSV</a>
 
   </div>
 
@@ -11,9 +11,9 @@
     c0-11.3-0.9-19.9-3.2-26.4C69.2,35.9,54.3,56.8,47.6,70.9z"></path></svg></h1>
 
   <?php foreach ($courses as $name => $values) : ?>
-  <div class="tablenav top" id="<?php echo $name; ?>" style="padding-top: 32px;">
+  <div class="tablenav top" id="<?php echo esc_attr( $name ); ?>" style="padding-top: 32px;">
     <div class="alignleft actions bulkactions">
-      <h2 style="margin-top: 8px;"><?php echo $name; ?></h2>
+      <h2 style="margin-top: 8px;"><?php echo esc_html( $name ); ?></h2>
     </div>
     <br class="clear">
   </div>
@@ -35,11 +35,11 @@
       <?php foreach ($values['buttons'] as $button => $info) : ?>
       <tr id='post-<?php echo $post_id; ?>'>
         <td class='name column-title' data-colname="Title">
-          <a href="<?php echo $info['link']; ?>"><?php echo $button ?></a>
+          <a href="<?php echo esc_url( $info['link'] ); ?>"><?php echo esc_html( $button ); ?></a>
         </td>
         <?php if (count($total_users) > 0) : ?>
         <td class='completable column-started num' data-colname="User Started">
-          <div id="completable-<?php echo $button; ?>-started">
+          <div id="completable-<?php echo esc_attr( $button ); ?>-started">
           <?php if ( $info['status'] === 'future' ) : ?>
           Scheduled
           <?php elseif ( $info['status'] === 'pending' ) : ?>
@@ -51,7 +51,7 @@
         </td>
         <?php endif; ?>
         <td class='completable column-completion num' data-colname="User Completion">
-          <div id="completable-<?php echo $button; ?>">
+          <div id="completable-<?php echo esc_attr( $button ); ?>">
             <?php if ( $info['status'] === 'future' ) : ?>
             Scheduled
             <?php elseif ( $info['status'] === 'pending' ) : ?>
@@ -65,7 +65,7 @@
         </td>
         <?php if (count($total_users) > 0) : ?>
         <td class="completable column-reset" data-colname="Reset">
-          <a href="#" class="wpc_reset_button" data-button-id="<?php echo $info['id']; ?>">Reset User Activity</a>
+          <a href="#" class="wpc_reset_button" data-button-id="<?php echo esc_attr( $info['id'] ); ?>">Reset User Activity</a>
         </td>
         <?php endif; ?>
       </tr>
